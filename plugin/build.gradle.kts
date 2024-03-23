@@ -1,11 +1,11 @@
-//import com.diffplug.spotless.LineEnding
+import com.diffplug.spotless.LineEnding
 //import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
     jacoco
-   // id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "6.25.0"
    // id("com.github.spotbugs") version "6.0.9"
 }
 
@@ -22,7 +22,6 @@ repositories {
 }
 
 dependencies {
-
     compileOnly("org.projectlombok:lombok:1.18.32")
     annotationProcessor("org.projectlombok:lombok:1.18.32")
 
@@ -67,15 +66,17 @@ tasks.named<Test>("test") {
 }
 
 
-//spotless {
-//    java{
-//        encoding("UTF-8")
-//        importOrder()
-//        removeUnusedImports()
-//        googleJavaFormat()
-//    }
-//    lineEndings = LineEnding.GIT_ATTRIBUTES
-//}
+spotless {
+    java{
+        encoding("UTF-8")
+        importOrder()
+        removeUnusedImports()
+        palantirJavaFormat()
+        formatAnnotations()
+        trimTrailingWhitespace()
+    }
+    lineEndings = LineEnding.GIT_ATTRIBUTES
+}
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
@@ -83,6 +84,12 @@ tasks.jacocoTestReport {
         xml.required = false
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
+    }
+}
+
+afterEvaluate{
+    tasks.spotlessCheck{
+        dependsOn(tasks.spotlessApply)
     }
 }
 

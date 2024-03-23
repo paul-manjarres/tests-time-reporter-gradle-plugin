@@ -4,33 +4,26 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.testing.Test;
+import org.paulmanjarres.gradle.timereporter.model.PluginConstants;
 
 public class TestTimeReporterPlugin implements Plugin<Project> {
 
-  private static final String PRINT_TEST_TIME_STATS_TASK_NAME = "printTestTimeStats";
+    public void apply(Project project) {
+        final TestTimeReporterExtension extension =
+                project.getExtensions().create(PluginConstants.EXTENSION_NAME, TestTimeReporterExtension.class);
 
-  public void apply(Project project) {
-    // Register a task
-    project.getTasks().register("greeting", task -> {
-      task.doLast(s -> System.out.println("Hello from plugin 'org.example.greeting'"));
-    });
+        final TimeReporterTestListener listener = new TimeReporterTestListener();
 
-    final TimeReporterTestListener listener = new TimeReporterTestListener();
-    registerPrinter(project, new PrintTestTimeStatsTask(listener));
-//    project.getTasks().register(PRINT_TEST_TIME_STATS_TASK_NAME, task ->
-//        task.doLast(new PrintTestTimeStatsTask(listener))
-//    );
+        project.getTasks()
+                .register(PluginConstants.PRINT_TEST_TIME_STATS_TASK_NAME, PrintTestTimeStatsTask.class, task -> {
+                    task.getTestListener().set(listener);
+                    task.getLongestTestsCount().set(extension.getLongestTestsCount());
+                });
 
-    final TaskCollection<Test> testTasks = project.getTasks().withType(Test.class);
-    testTasks.forEach(it -> {
-      it.addTestListener(listener);
-      it.finalizedBy().finalizedBy(PRINT_TEST_TIME_STATS_TASK_NAME);
-    });
-  }
-
-  public void registerPrinter(Project project, PrintTestTimeStatsTask printer){
-    project.getTasks().register(PRINT_TEST_TIME_STATS_TASK_NAME, task ->
-        task.doLast(printer)
-    );
-  }
+        final TaskCollection<Test> testTasks = project.getTasks().withType(Test.class);
+        testTasks.forEach(it -> {
+            it.addTestListener(listener);
+            it.finalizedBy().finalizedBy(PluginConstants.PRINT_TEST_TIME_STATS_TASK_NAME);
+        });
+    }
 }
