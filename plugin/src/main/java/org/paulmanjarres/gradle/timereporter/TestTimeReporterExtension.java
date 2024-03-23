@@ -9,4 +9,8 @@ public abstract class TestTimeReporterExtension {
      * @return Property of type Integer
      */
     public abstract Property<Integer> getLongestTestsCount();
+
+    public abstract Property<Integer> getBinSize();
+
+    public abstract Property<Integer> getSlowThreshold();
 }

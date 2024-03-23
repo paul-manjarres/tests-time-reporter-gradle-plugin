@@ -27,7 +27,9 @@ class TestsTimeReporterGradlePluginPluginFunctionalTest {
     @Test
     void canRunTask() throws IOException {
         writeString(getSettingsFile(), "");
-        writeString(getBuildFile(), "plugins {" + "  id('io.github.paul-manjarres.test-time-reporter') " + "}");
+        writeString(
+                getBuildFile(),
+                "plugins {" + "id('java')" + "\n " + "id('io.github.paul-manjarres.test-time-reporter') " + "}");
 
         // Run the build
         GradleRunner runner = GradleRunner.create();
