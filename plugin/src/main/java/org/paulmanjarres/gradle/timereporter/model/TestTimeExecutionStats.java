@@ -2,11 +2,18 @@ package org.paulmanjarres.gradle.timereporter.model;
 
 import java.time.Duration;
 import lombok.AllArgsConstructor;
+import lombok.ToString;
 import lombok.Value;
+import org.gradle.api.tasks.testing.TestResult;
 
 @Value
 @AllArgsConstructor
+@ToString
 public class TestTimeExecutionStats {
+
+    /** Test class name */
+    String testClassName;
+
     /** The name of the test */
     String testName;
 
@@ -14,5 +21,5 @@ public class TestTimeExecutionStats {
     Duration duration;
 
     /** Result of the test */
-    String result;
+    TestResult.ResultType result;
 }

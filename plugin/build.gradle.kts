@@ -15,6 +15,10 @@ description = ""
 java{
     withJavadocJar()
     withSourcesJar()
+
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 repositories {

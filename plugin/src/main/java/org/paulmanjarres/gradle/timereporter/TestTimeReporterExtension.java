@@ -12,5 +12,9 @@ public abstract class TestTimeReporterExtension {
 
     public abstract Property<Integer> getBinSize();
 
+    /**
+     * The threshold to consider a test as slow, in milliseconds.
+     * @return Property of type Integer
+     */
     public abstract Property<Integer> getSlowThreshold();
 }

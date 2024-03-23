@@ -1,13 +1,14 @@
 package org.paulmanjarres.gradle.timereporter;
 
-import java.util.Comparator;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
+import org.paulmanjarres.gradle.timereporter.model.GroupedBySlowestTests;
+import org.paulmanjarres.gradle.timereporter.model.GroupedResultsByClass;
+import org.paulmanjarres.gradle.timereporter.model.GroupedResultsByStatus;
 import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
 
 public abstract class PrintTestTimeStatsTask extends DefaultTask {
@@ -30,9 +31,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     @TaskAction
     public void print() {
         this.getLogger().lifecycle("Tests time execution results");
-        System.out.println("Tests time execution results");
+        // System.out.println("Tests time execution results");
         process();
-        System.out.println("================");
+        this.getLogger().lifecycle("================");
     }
 
     public void process() {
@@ -40,21 +41,44 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         Set<TestTimeExecutionStats> stats = this.getTestListener().get().getStats();
         Integer binSize = this.getBinSize().get();
         Integer slowThreshold = this.getSlowThreshold().get();
+        Integer longestTestCount = this.getLongestTestsCount().get();
         System.out.println("Bin size: " + binSize);
         System.out.println("slowThreshold: " + slowThreshold);
+        System.out.println("longestTestCount: " + longestTestCount);
 
-        stats.stream()
-                .sorted(Comparator.comparing(TestTimeExecutionStats::getDuration)
-                        .reversed())
-                .limit(10)
-                .collect(Collectors.toList())
-                .forEach(t -> {
-                    System.out.println(
-                            t.getDuration().toMillis() + "ms - \t " + t.getTestName() + " : " + t.getResult());
-                });
+        // Slowest tests - toggle para mostrar detalles
 
-        // Slower tests
-        // buckets
+        int totalTestCount = stats.size();
+        System.out.println("\nTotal Test Count: " + totalTestCount);
 
+        // Print Tests distribution by status
+        System.out.println("\nGroup By Result:");
+        GroupedResultsByStatus.from(stats).forEach(r -> System.out.println(formatGroupResultsByStatus(r)));
+
+        this.getLogger().lifecycle("\nGroup By Class:");
+        GroupedResultsByClass.from(stats).forEach(r -> System.out.println(formatGroupResultsByClass(r)));
+
+        this.getLogger()
+                .lifecycle("\nSlowest tests - Threshold: " + slowThreshold + " - Max Results: " + longestTestCount);
+        GroupedBySlowestTests.from(stats, longestTestCount, slowThreshold)
+                .forEach(r -> System.out.println(formatSlowestTest(r)));
+
+        // Histogram  toggle
+        //
+
+    }
+
+    public String formatGroupResultsByStatus(GroupedResultsByStatus r) {
+        return String.format(" - %s : %3.2f%% (%d)", r.getType(), r.getPercentage() * 100, r.getCount());
+    }
+
+    public String formatGroupResultsByClass(GroupedResultsByClass r) {
+        return String.format(" - %s : %3.2f%% (%d)", r.getTestClassName(), r.getPercentage() * 100, r.getCount());
+    }
+
+    public String formatSlowestTest(TestTimeExecutionStats r) {
+        return String.format(
+                " %4d ms - %s - %s.%s ",
+                r.getDuration().toMillis(), r.getResult(), r.getTestClassName(), r.getTestName());
     }
 }

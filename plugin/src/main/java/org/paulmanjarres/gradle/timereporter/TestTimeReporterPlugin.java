@@ -15,7 +15,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
 
     public void apply(Project project) {
 
-        //boolean isPluginApplied = project.getPluginManager().hasPlugin(PluginConstants.PLUGIN_ID);
+        // boolean isPluginApplied = project.getPluginManager().hasPlugin(PluginConstants.PLUGIN_ID);
         verifyGradleVersion(GradleVersion.current());
 
         final TestTimeReporterExtension extension = registerExtension(project);

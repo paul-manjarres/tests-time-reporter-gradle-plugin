@@ -20,7 +20,11 @@ public class TimeReporterTestListener implements TestListener {
     public void beforeSuite(TestDescriptor suite) {}
 
     @Override
-    public void afterSuite(TestDescriptor suite, TestResult result) {}
+    public void afterSuite(TestDescriptor suite, TestResult result) {
+
+        Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
+        System.out.println("Test Suite: " + suite.getName() + " Total Time: " + duration.toMillis() + " ms");
+    }
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {}
@@ -28,9 +32,10 @@ public class TimeReporterTestListener implements TestListener {
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
         this.stats.add(new TestTimeExecutionStats(
-                testDescriptor.getClassName() + "." + testDescriptor.getName(),
+                testDescriptor.getClassName(),
+                testDescriptor.getName(),
                 Duration.ofMillis(result.getEndTime() - result.getStartTime()),
-                result.getResultType().name()));
+                result.getResultType()));
     }
 
     public Set<TestTimeExecutionStats> getStats() {
