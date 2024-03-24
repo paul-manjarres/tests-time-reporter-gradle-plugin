@@ -21,9 +21,8 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void afterSuite(TestDescriptor suite, TestResult result) {
-
-        Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
-        System.out.println("Test Suite: " + suite.getName() + " Total Time: " + duration.toMillis() + " ms");
+        // Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
+        // System.out.println("Test Suite: " + suite.getName() + " Total Time: " + duration.toMillis() + " ms");
     }
 
     @Override

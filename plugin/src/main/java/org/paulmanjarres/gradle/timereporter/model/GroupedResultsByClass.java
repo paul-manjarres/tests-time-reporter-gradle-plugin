@@ -14,6 +14,7 @@ public class GroupedResultsByClass {
     String testClassName;
     double percentage;
     int count;
+    int total;
 
     public static List<GroupedResultsByClass> from(Set<TestTimeExecutionStats> stats) {
         return stats.stream()
@@ -23,7 +24,8 @@ public class GroupedResultsByClass {
                 .map(e -> new GroupedResultsByClass(
                         e.getKey(),
                         e.getValue().size() / (double) stats.size(),
-                        e.getValue().size()))
+                        e.getValue().size(),
+                        stats.size()))
                 .collect(Collectors.toList());
     }
 }

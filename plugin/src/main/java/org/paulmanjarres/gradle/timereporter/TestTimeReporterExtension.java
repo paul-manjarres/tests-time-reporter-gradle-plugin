@@ -10,11 +10,11 @@ public abstract class TestTimeReporterExtension {
      */
     public abstract Property<Integer> getLongestTestsCount();
 
-    public abstract Property<Integer> getBinSize();
+    public abstract Property<Integer> getBinSizeInMillis();
 
     /**
      * The threshold to consider a test as slow, in milliseconds.
      * @return Property of type Integer
      */
-    public abstract Property<Integer> getSlowThreshold();
+    public abstract Property<Integer> getSlowThresholdInMillis();
 }

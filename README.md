@@ -14,9 +14,10 @@ plugins {
     id("io.github.paul-manjarres.test-time-reporter") version "0.0.1"
 }
 
+// These are the default values, can be omitted if they work for you
 testTimeReporter{
-    longestTestsCount = 14
-    slowThreshold = 0
+    longestTestsCount = 10
+    slowThresholdInMillis = 200
 }
 ```
 

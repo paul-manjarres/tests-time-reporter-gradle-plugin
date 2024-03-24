@@ -40,7 +40,7 @@ class TestsTimeReporterGradlePluginPluginFunctionalTest {
         BuildResult result = runner.build();
 
         // Verify the result
-        assertTrue(result.getOutput().contains("Tests time execution results"));
+        assertTrue(result.getOutput().contains("Tests Time Execution Statistics"));
     }
 
     private void writeString(File file, String string) throws IOException {
