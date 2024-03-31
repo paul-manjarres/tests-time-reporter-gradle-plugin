@@ -11,6 +11,10 @@ import org.jetbrains.annotations.NotNull;
 import org.paulmanjarres.gradle.timereporter.model.PluginConstants;
 import org.paulmanjarres.gradle.timereporter.model.PluginExtensionDefaultValues;
 
+/**
+ * The Plugin main class.
+ * @author <a href="mailto:paul.manjarres@gmail.com">Jean Paul Manjarres Correal</a>
+ */
 public class TestTimeReporterPlugin implements Plugin<Project> {
 
     private static final GradleVersion MINIMUM_SUPPORTED_VERSION = GradleVersion.version("7.0");
@@ -51,6 +55,9 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
             task.getLongestTestsCount().set(extension.getLongestTestsCount());
             task.getBinSize().set(extension.getBinSizeInMillis());
             task.getSlowThreshold().set(extension.getSlowThresholdInMillis());
+            task.getShowGroupByClass().set(extension.getShowGroupByClass());
+            task.getShowGroupByResult().set(extension.getShowGroupByResult());
+            task.getShowSlowestTests().set(extension.getShowSlowestTests());
             // task.dependsOn("test");
         });
     }
@@ -59,5 +66,8 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         extension.getLongestTestsCount().convention(PluginExtensionDefaultValues.longestTestsCount);
         extension.getBinSizeInMillis().convention(PluginExtensionDefaultValues.binSizeInMillis);
         extension.getSlowThresholdInMillis().convention(PluginExtensionDefaultValues.slowThresholdInMillis);
+        extension.getShowGroupByResult().convention(PluginExtensionDefaultValues.showGroupByResult);
+        extension.getShowGroupByClass().convention(PluginExtensionDefaultValues.showGroupByClass);
+        extension.getShowSlowestTests().convention(PluginExtensionDefaultValues.showSlowestTests);
     }
 }

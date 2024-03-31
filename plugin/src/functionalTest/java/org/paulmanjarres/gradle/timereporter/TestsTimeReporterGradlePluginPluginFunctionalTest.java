@@ -11,7 +11,6 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-/** A simple functional test for the 'org.example.greeting' plugin. */
 class TestsTimeReporterGradlePluginPluginFunctionalTest {
     @TempDir
     File projectDir;

@@ -28,6 +28,18 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     @Optional
     public abstract Property<Integer> getSlowThreshold();
 
+    @Input
+    @Optional
+    public abstract Property<Boolean> getShowGroupByResult();
+
+    @Input
+    @Optional
+    public abstract Property<Boolean> getShowGroupByClass();
+
+    @Input
+    @Optional
+    public abstract Property<Boolean> getShowSlowestTests();
+
     @TaskAction
     public void print() {
         this.getLogger().lifecycle("Tests Time Execution Statistics");
@@ -41,25 +53,40 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         Integer binSize = this.getBinSize().get();
         Integer slowThreshold = this.getSlowThreshold().get();
         Integer longestTestCount = this.getLongestTestsCount().get();
+        Boolean showGroupByResult = this.getShowGroupByResult().get();
+        Boolean showGroupByClass = this.getShowGroupByClass().get();
+        Boolean showSlowestTests = this.getShowSlowestTests().get();
+
+        this.getLogger().info("longestTestCount = {}", longestTestCount);
+        this.getLogger().info("slowThreshold = {}", slowThreshold);
+        this.getLogger().info("showGroupByResult = {}", showGroupByResult);
+        this.getLogger().info("showGroupByClass = {}", showGroupByClass);
+        this.getLogger().info("showSlowestTests = {}", showSlowestTests);
+        this.getLogger().info("binSize = {}", binSize);
 
         int totalTestCount = stats.size();
         this.getLogger().lifecycle("Total Test Count: {}", totalTestCount);
         logNewLine();
 
-        this.getLogger().lifecycle("Group By Result:");
-        GroupedResultsByStatus.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByStatus(r)));
+        if (showGroupByResult) {
+            this.getLogger().lifecycle("Group By Result:");
+            GroupedResultsByStatus.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByStatus(r)));
+            logNewLine();
+        }
 
-        logNewLine();
-        this.getLogger().lifecycle("Group By Class:");
-        GroupedResultsByClass.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
-        logNewLine();
+        if (showGroupByClass) {
+            this.getLogger().lifecycle("Group By Class:");
+            GroupedResultsByClass.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
+            logNewLine();
+        }
 
-        this.getLogger()
-                .lifecycle("Slowest tests - Threshold: {}ms - Max Results: {}", slowThreshold, longestTestCount);
-        GroupedBySlowestTests.from(stats, longestTestCount, slowThreshold)
-                .forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
-
-        logNewLine();
+        if (showSlowestTests) {
+            this.getLogger()
+                    .lifecycle("Slowest tests - Threshold: {}ms - Max Results: {}", slowThreshold, longestTestCount);
+            GroupedBySlowestTests.from(stats, longestTestCount, slowThreshold)
+                    .forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
+            logNewLine();
+        }
 
         // Histogram  toggle
 
@@ -77,7 +104,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     public String formatSlowestTest(TestTimeExecutionStats r) {
         return String.format(
-                " %4d ms - %s - %s.%s ",
+                "[%4d ms] - %s - %s.%s ",
                 r.getDuration().toMillis(), r.getResult(), r.getTestClassName(), r.getTestName());
     }
 

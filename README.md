@@ -11,13 +11,15 @@ In your build.gradle:
 
 ```kotlin
 plugins {
-    id("io.github.paul-manjarres.test-time-reporter") version "0.0.1"
+    id("io.github.paul-manjarres.test-time-reporter") version "0.1.0"
 }
 
 // These are the default values, can be omitted if they work for you
 testTimeReporter{
     longestTestsCount = 10
-    slowThresholdInMillis = 200
+    slowThresholdInMillis = 500
+    showGroupByResult = true
+    showGroupByClass = true
+    showSlowestTests = true
 }
 ```
-

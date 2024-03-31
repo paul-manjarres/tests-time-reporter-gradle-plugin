@@ -2,6 +2,11 @@ package org.paulmanjarres.gradle.timereporter;
 
 import org.gradle.api.provider.Property;
 
+/**
+ * The Plugin extension class.
+ * Registers the configuration options.
+ * @author <a href="mailto:paul.manjarres@gmail.com">Jean Paul Manjarres Correal</a>
+ */
 public abstract class TestTimeReporterExtension {
 
     /**
@@ -10,6 +15,10 @@ public abstract class TestTimeReporterExtension {
      */
     public abstract Property<Integer> getLongestTestsCount();
 
+    /**
+     * The size of the partitions for the histogram.
+     * @return Property of type Integer
+     */
     public abstract Property<Integer> getBinSizeInMillis();
 
     /**
@@ -17,4 +26,10 @@ public abstract class TestTimeReporterExtension {
      * @return Property of type Integer
      */
     public abstract Property<Integer> getSlowThresholdInMillis();
+
+    public abstract Property<Boolean> getShowGroupByResult();
+
+    public abstract Property<Boolean> getShowGroupByClass();
+
+    public abstract Property<Boolean> getShowSlowestTests();
 }
