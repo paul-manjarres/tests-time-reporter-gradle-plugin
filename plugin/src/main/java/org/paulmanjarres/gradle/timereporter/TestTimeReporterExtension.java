@@ -16,6 +16,12 @@ public abstract class TestTimeReporterExtension {
     public abstract Property<Integer> getLongestTestsCount();
 
     /**
+     * The max amount of results for the grouping of tests by class.
+     * @return Property of type Integer
+     */
+    public abstract Property<Integer> getMaxResultsForGroupByClass();
+
+    /**
      * The size of the partitions for the histogram.
      * @return Property of type Integer
      */
@@ -32,4 +38,6 @@ public abstract class TestTimeReporterExtension {
     public abstract Property<Boolean> getShowGroupByClass();
 
     public abstract Property<Boolean> getShowSlowestTests();
+
+    public abstract Property<Boolean> getExperimentalFeatures();
 }

@@ -5,6 +5,10 @@ This is a simple Gradle plugin that reports the tests execution time statistics 
 
 The plugin is inspired in the Karma Time Stats Reporter plugin (https://www.npmjs.com/package/karma-time-stats-reporter)
 
+![Build](https://github.com/paul-manjarres/tests-time-reporter-gradle-plugin/actions/workflows/gradle.yml/badge.svg)
+
+
+
 ## Use In Project
 
 In your build.gradle:

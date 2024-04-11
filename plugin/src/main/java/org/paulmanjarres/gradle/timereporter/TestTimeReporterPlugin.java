@@ -17,7 +17,7 @@ import org.paulmanjarres.gradle.timereporter.model.PluginExtensionDefaultValues;
  */
 public class TestTimeReporterPlugin implements Plugin<Project> {
 
-    private static final GradleVersion MINIMUM_SUPPORTED_VERSION = GradleVersion.version("7.0");
+    private static final GradleVersion MINIMUM_SUPPORTED_VERSION = GradleVersion.version("6.9");
 
     public void apply(@NotNull Project project) {
 
@@ -58,7 +58,8 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
             task.getShowGroupByClass().set(extension.getShowGroupByClass());
             task.getShowGroupByResult().set(extension.getShowGroupByResult());
             task.getShowSlowestTests().set(extension.getShowSlowestTests());
-            // task.dependsOn("test");
+            task.getMaxResultsForGroupByClass().set(extension.getMaxResultsForGroupByClass());
+            task.getExperimentalFeatures().set(extension.getExperimentalFeatures());
         });
     }
 
@@ -69,5 +70,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         extension.getShowGroupByResult().convention(PluginExtensionDefaultValues.showGroupByResult);
         extension.getShowGroupByClass().convention(PluginExtensionDefaultValues.showGroupByClass);
         extension.getShowSlowestTests().convention(PluginExtensionDefaultValues.showSlowestTests);
+        extension.getMaxResultsForGroupByClass().convention(PluginExtensionDefaultValues.maxResultsForGroupByClass);
+        extension.getExperimentalFeatures().convention(PluginExtensionDefaultValues.experimentalFeatures);
     }
 }

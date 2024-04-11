@@ -10,7 +10,7 @@ plugins {
    // id("com.github.spotbugs") version "6.0.9"
 }
 
-version = "0.0.1-SNAPSHOT"
+version = "0.2.0"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 

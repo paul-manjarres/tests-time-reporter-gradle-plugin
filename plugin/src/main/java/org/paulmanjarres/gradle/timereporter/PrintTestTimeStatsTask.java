@@ -1,15 +1,13 @@
 package org.paulmanjarres.gradle.timereporter;
 
+import java.util.Map;
 import java.util.Set;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
-import org.paulmanjarres.gradle.timereporter.model.GroupedBySlowestTests;
-import org.paulmanjarres.gradle.timereporter.model.GroupedResultsByClass;
-import org.paulmanjarres.gradle.timereporter.model.GroupedResultsByStatus;
-import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
+import org.paulmanjarres.gradle.timereporter.model.*;
 
 public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
@@ -19,6 +17,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     @Input
     @Optional
     public abstract Property<Integer> getLongestTestsCount();
+
+    @Input
+    @Optional
+    public abstract Property<Integer> getMaxResultsForGroupByClass();
 
     @Input
     @Optional
@@ -40,6 +42,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     @Optional
     public abstract Property<Boolean> getShowSlowestTests();
 
+    @Input
+    @Optional
+    public abstract Property<Boolean> getExperimentalFeatures();
+
     @TaskAction
     public void print() {
         this.getLogger().lifecycle("Tests Time Execution Statistics");
@@ -56,16 +62,21 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         Boolean showGroupByResult = this.getShowGroupByResult().get();
         Boolean showGroupByClass = this.getShowGroupByClass().get();
         Boolean showSlowestTests = this.getShowSlowestTests().get();
+        Boolean experimentalFeatures = this.getExperimentalFeatures().get();
+        int maxResultsForGroupByClass = this.getMaxResultsForGroupByClass().get();
 
         this.getLogger().info("longestTestCount = {}", longestTestCount);
+        this.getLogger().info("maxResultsForGroupByClass = {}", maxResultsForGroupByClass);
         this.getLogger().info("slowThreshold = {}", slowThreshold);
         this.getLogger().info("showGroupByResult = {}", showGroupByResult);
         this.getLogger().info("showGroupByClass = {}", showGroupByClass);
         this.getLogger().info("showSlowestTests = {}", showSlowestTests);
+        this.getLogger().info("experimentalFeatures = {}", experimentalFeatures);
         this.getLogger().info("binSize = {}", binSize);
 
         int totalTestCount = stats.size();
         this.getLogger().lifecycle("Total Test Count: {}", totalTestCount);
+        // TODO: Total Time,
         logNewLine();
 
         if (showGroupByResult) {
@@ -75,8 +86,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         }
 
         if (showGroupByClass) {
-            this.getLogger().lifecycle("Group By Class:");
-            GroupedResultsByClass.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
+            this.getLogger().lifecycle("Group By Class - Max Results: {}", maxResultsForGroupByClass);
+            GroupedResultsByClass.from(stats, maxResultsForGroupByClass)
+                    .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
             logNewLine();
         }
 
@@ -90,6 +102,21 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         // Histogram  toggle
 
+        // Suite stats
+        if (experimentalFeatures) {
+            final Map<String, TestSuiteTimeExecutionStats> sStats =
+                    this.getTestListener().get().getSuiteStats();
+
+            sStats.forEach((k, v) -> this.getLogger()
+                    .lifecycle(
+                            "{} - # Tests: {} -  Duration: {}ms Init Time: {}ms",
+                            v.getClassName(),
+                            v.getNumberOfTests(),
+                            v.getDuration().toMillis(),
+                            v.getInitTimeMillis()));
+
+            logNewLine();
+        }
     }
 
     public String formatGroupResultsByStatus(GroupedResultsByStatus r) {
