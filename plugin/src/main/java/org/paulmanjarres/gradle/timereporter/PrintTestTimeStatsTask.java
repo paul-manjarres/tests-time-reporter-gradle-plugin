@@ -77,34 +77,34 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         boolean experimentalFeatures = this.getExperimentalFeatures().get();
         int maxResultsForGroupByClass = this.getMaxResultsForGroupByClass().get();
 
-        this.getLogger().info("longestTestCount = {}", longestTestCount);
-        this.getLogger().info("maxResultsForGroupByClass = {}", maxResultsForGroupByClass);
-        this.getLogger().info("slowThreshold = {}", slowThreshold);
-        this.getLogger().info("showGroupByResult = {}", showGroupByResult);
-        this.getLogger().info("showGroupByClass = {}", showGroupByClass);
-        this.getLogger().info("showSlowestTests = {}", showSlowestTests);
-        this.getLogger().info("experimentalFeatures = {}", experimentalFeatures);
-        this.getLogger().info("coloredOutput = {}", coloredOutput);
-        this.getLogger().info("showHistogram = {}", showHistogram);
-        this.getLogger().info("binSize = {}", binSize);
+        this.getLogger().debug("longestTestCount = {}", longestTestCount);
+        this.getLogger().debug("maxResultsForGroupByClass = {}", maxResultsForGroupByClass);
+        this.getLogger().debug("slowThreshold = {}", slowThreshold);
+        this.getLogger().debug("showGroupByResult = {}", showGroupByResult);
+        this.getLogger().debug("showGroupByClass = {}", showGroupByClass);
+        this.getLogger().debug("showSlowestTests = {}", showSlowestTests);
+        this.getLogger().debug("experimentalFeatures = {}", experimentalFeatures);
+        this.getLogger().debug("coloredOutput = {}", coloredOutput);
+        this.getLogger().debug("showHistogram = {}", showHistogram);
+        this.getLogger().debug("binSize = {}", binSize);
 
         final int totalTestCount = stats.size();
 
         cUtils.setColorEnabled(coloredOutput);
 
-        this.getLogger().lifecycle(cUtils.printInYellow("========= Tests Time Execution Statistics =========="));
+        this.getLogger().lifecycle(cUtils.printInYellow("========== Tests Time Execution Statistics =========="));
         this.getLogger().lifecycle("Total Test Count: [{}]", totalTestCount);
         // TODO: Total Time,
         logNewLine();
 
         if (showGroupByResult) {
-            this.getLogger().lifecycle("Group By Result:");
+            this.getLogger().lifecycle("Tests grouped by Result:");
             GroupedResultsByStatus.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByStatus(r)));
             logNewLine();
         }
 
         if (showGroupByClass) {
-            this.getLogger().lifecycle("Group By Class - Max Results: [{}]", maxResultsForGroupByClass);
+            this.getLogger().lifecycle("Tests grouped by Class - Max Results: [{}]", maxResultsForGroupByClass);
             GroupedResultsByClass.from(stats, maxResultsForGroupByClass)
                     .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
             logNewLine();
@@ -114,32 +114,36 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
             final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
             conf.setBucketSize(binSize);
             conf.setMaxValue(slowThreshold);
-
             final Histogram h = Histogram.from(stats, conf);
-
-            this.getLogger().lifecycle("Histogram - Total: [{}] ", h.getCount());
+            this.getLogger()
+                    .lifecycle(
+                            "Histogram - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms]",
+                            h.getCount(),
+                            binSize,
+                            slowThreshold);
 
             for (int i = 0; i < h.getBuckets(); i++) {
                 this.getLogger()
                         .lifecycle(
-                                "[{}-{}ms] \t: {} \t [ {}]",
-                                i * binSize,
-                                (i + 1) * binSize,
-                                h.getValues()[i],
-                                String.format("%3.2f%%", h.getPercentages()[i]));
+                                " [{} - {}ms] : {} [ {}]",
+                                String.format("%4d", i * binSize),
+                                String.format("%4d", (i + 1) * binSize),
+                                String.format("%4d", h.getValues()[i]),
+                                String.format("%5.2f%%", h.getPercentages()[i]));
             }
+
             this.getLogger()
                     .lifecycle(
-                            cUtils.printInYellow("[>{}ms] \t: {} \t [ {}]"),
-                            h.getMaxValue(),
-                            h.getSlowTestCount(),
-                            String.format("%3.2f%%", h.getSlowTestPercentage()));
+                            " [{}] : {} [ {}]",
+                            cUtils.printInRed(String.format("     > %4dms", h.getMaxValue())),
+                            String.format("%4d", h.getSlowTestCount()),
+                            cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())));
             logNewLine();
             this.getLogger()
                     .lifecycle(
-                            cUtils.printInYellow("({}) {}  of tests were considered slow"),
-                            h.getSlowTestCount(),
-                            String.format("%3.2f%%", h.getSlowTestPercentage()));
+                            "{} of the tests ({}) were considered slow. ",
+                            cUtils.printInYellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
+                            h.getSlowTestCount());
 
             logNewLine();
         }
@@ -173,19 +177,23 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     public String formatGroupResultsByStatus(GroupedResultsByStatus r) {
         final ConsoleUtils.Color color = getConsoleTextColorBy(r.getType());
         final String text = String.format(
-                "- %s : %3.2f%% (%d/%d)", r.getType(), r.getPercentage() * 100, r.getCount(), r.getTotal());
+                "- %s : %6.2f%% (%3d/%3d)", r.getType(), r.getPercentage() * 100, r.getCount(), r.getTotal());
         return cUtils.print(text, color);
     }
 
     public String formatGroupResultsByClass(GroupedResultsByClass r) {
         return String.format(
-                " - %3.2f%% (%d/%d) : %s ", r.getPercentage() * 100, r.getCount(), r.getTotal(), r.getTestClassName());
+                " - %5.2f%% (%3d/%3d) : %s ",
+                r.getPercentage() * 100, r.getCount(), r.getTotal(), r.getTestClassName());
     }
 
     public String formatSlowestTest(TestTimeExecutionStats r) {
         return String.format(
                 "[%4d ms] - %s - %s.%s ",
-                r.getDuration().toMillis(), r.getResult(), r.getTestClassName(), r.getTestName());
+                r.getDuration().toMillis(),
+                cUtils.print(r.getResult().toString(), getConsoleTextColorBy(r.getResult())),
+                r.getTestClassName(),
+                r.getTestName());
     }
 
     public void logNewLine() {

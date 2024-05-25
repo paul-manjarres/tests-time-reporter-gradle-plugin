@@ -1,5 +1,4 @@
 import com.diffplug.spotless.LineEnding
-//import com.github.spotbugs.snom.SpotBugsTask
 
 plugins {
     `java-gradle-plugin`
@@ -7,14 +6,13 @@ plugins {
     jacoco
     id("com.gradle.plugin-publish") version "1.2.1"
     id("com.diffplug.spotless") version "6.25.0"
-   // id("com.github.spotbugs") version "6.0.9"
 }
 
-version = "0.3.0"
+version = "0.4.0"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 
-java{
+java {
     withJavadocJar()
     withSourcesJar()
     toolchain {
@@ -39,7 +37,6 @@ gradlePlugin {
     }
 }
 
-
 dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
@@ -50,8 +47,7 @@ dependencies {
 }
 
 // Add a source set for the functional test suite
-val functionalTestSourceSet = sourceSets.create("functionalTest") {
-}
+val functionalTestSourceSet = sourceSets.create("functionalTest") {}
 
 configurations["functionalTestImplementation"].extendsFrom(configurations["testImplementation"])
 configurations["functionalTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
@@ -76,9 +72,8 @@ tasks.named<Test>("test") {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-
 spotless {
-    java{
+    java {
         encoding("UTF-8")
         importOrder()
         removeUnusedImports()
@@ -98,26 +93,8 @@ tasks.jacocoTestReport {
     }
 }
 
-afterEvaluate{
-    tasks.spotlessCheck{
+afterEvaluate {
+    tasks.spotlessCheck {
         dependsOn(tasks.spotlessApply)
     }
 }
-
-//tasks.spotbugsMain{
-//    ignoreFailures = true
-//    showProgress = false
-//    showStackTraces = false
-//}
-//
-//tasks.spotbugsTest{
-//    ignoreFailures = true
-//    showProgress = false
-//    showStackTraces = false
-//}
-//
-//tasks.named<SpotBugsTask>("spotbugsFunctionalTest") {
-//    ignoreFailures = true
-//    showProgress = false
-//    showStackTraces = false
-//}
