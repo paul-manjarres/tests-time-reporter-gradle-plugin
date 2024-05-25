@@ -31,11 +31,17 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         registerTask(project, listener, extension);
 
         final TaskCollection<Test> testTasks = project.getTasks().withType(Test.class);
-        testTasks.forEach(it -> {
+        project.getLogger().info("[{}] - Test tasks count: {}", EXTENSION_NAME, testTasks.size());
+
+        testTasks.configureEach(it -> {
             it.addTestListener(listener);
             it.finalizedBy(PRINT_TEST_TIME_STATS_TASK_NAME);
             project.getLogger()
-                    .info("Adding finalizer [{}] on task: {}", PRINT_TEST_TIME_STATS_TASK_NAME, it.getName());
+                    .info(
+                            "[{}] - Adding finalizer [{}] on task: {}",
+                            EXTENSION_NAME,
+                            PRINT_TEST_TIME_STATS_TASK_NAME,
+                            it.getName());
         });
     }
 
@@ -48,7 +54,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
     }
 
     TestTimeReporterExtension registerExtension(Project project) {
-        project.getLogger().info("Registering extension {}", EXTENSION_NAME);
+        project.getLogger().info("[{}] - Registering extension {}", EXTENSION_NAME, EXTENSION_NAME);
         return project.getExtensions().create(PluginConstants.EXTENSION_NAME, TestTimeReporterExtension.class);
     }
 
@@ -66,7 +72,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
             task.getShowHistogram().set(extension.getShowHistogram());
             task.getColoredOutput().set(extension.getColoredOutput());
         });
-        project.getLogger().info("Registered task {} ", PRINT_TEST_TIME_STATS_TASK_NAME);
+        project.getLogger().info("[{}] - Registered task {} ", EXTENSION_NAME, PRINT_TEST_TIME_STATS_TASK_NAME);
     }
 
     void setExtensionDefaultValues(TestTimeReporterExtension extension) {

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0
+* Changes in output formatting.
+* Changes in documentation.
+
 ## v0.3.0
 * Colored output
 * Histogram for test time distribution
