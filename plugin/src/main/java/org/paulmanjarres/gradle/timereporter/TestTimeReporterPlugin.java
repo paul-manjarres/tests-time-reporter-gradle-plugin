@@ -1,5 +1,6 @@
 package org.paulmanjarres.gradle.timereporter;
 
+import static org.paulmanjarres.gradle.timereporter.model.PluginConstants.EXTENSION_NAME;
 import static org.paulmanjarres.gradle.timereporter.model.PluginConstants.PRINT_TEST_TIME_STATS_TASK_NAME;
 
 import org.gradle.api.Plugin;
@@ -21,7 +22,6 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
 
     public void apply(@NotNull Project project) {
 
-        // boolean isPluginApplied = project.getPluginManager().hasPlugin(PluginConstants.PLUGIN_ID);
         verifyGradleVersion(GradleVersion.current());
 
         final TestTimeReporterExtension extension = registerExtension(project);
@@ -33,7 +33,9 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         final TaskCollection<Test> testTasks = project.getTasks().withType(Test.class);
         testTasks.forEach(it -> {
             it.addTestListener(listener);
-            it.finalizedBy().finalizedBy(PRINT_TEST_TIME_STATS_TASK_NAME);
+            it.finalizedBy(PRINT_TEST_TIME_STATS_TASK_NAME);
+            project.getLogger()
+                    .info("Adding finalizer [{}] on task: {}", PRINT_TEST_TIME_STATS_TASK_NAME, it.getName());
         });
     }
 
@@ -46,6 +48,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
     }
 
     TestTimeReporterExtension registerExtension(Project project) {
+        project.getLogger().info("Registering extension {}", EXTENSION_NAME);
         return project.getExtensions().create(PluginConstants.EXTENSION_NAME, TestTimeReporterExtension.class);
     }
 
@@ -60,7 +63,10 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
             task.getShowSlowestTests().set(extension.getShowSlowestTests());
             task.getMaxResultsForGroupByClass().set(extension.getMaxResultsForGroupByClass());
             task.getExperimentalFeatures().set(extension.getExperimentalFeatures());
+            task.getShowHistogram().set(extension.getShowHistogram());
+            task.getColoredOutput().set(extension.getColoredOutput());
         });
+        project.getLogger().info("Registered task {} ", PRINT_TEST_TIME_STATS_TASK_NAME);
     }
 
     void setExtensionDefaultValues(TestTimeReporterExtension extension) {
@@ -72,5 +78,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         extension.getShowSlowestTests().convention(PluginExtensionDefaultValues.showSlowestTests);
         extension.getMaxResultsForGroupByClass().convention(PluginExtensionDefaultValues.maxResultsForGroupByClass);
         extension.getExperimentalFeatures().convention(PluginExtensionDefaultValues.experimentalFeatures);
+        extension.getShowHistogram().convention(PluginExtensionDefaultValues.showHistogram);
+        extension.getColoredOutput().convention(PluginExtensionDefaultValues.coloredOutput);
     }
 }

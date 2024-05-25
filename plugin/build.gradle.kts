@@ -10,7 +10,7 @@ plugins {
    // id("com.github.spotbugs") version "6.0.9"
 }
 
-version = "0.2.0"
+version = "0.3.0"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 
@@ -39,12 +39,14 @@ gradlePlugin {
     }
 }
 
-dependencies {
-    compileOnly("org.projectlombok:lombok:1.18.32")
-    annotationProcessor("org.projectlombok:lombok:1.18.32")
 
-    testImplementation(libs.junit.jupiter)
+dependencies {
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertJ)
 }
 
 // Add a source set for the functional test suite

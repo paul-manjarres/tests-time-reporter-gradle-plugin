@@ -39,5 +39,9 @@ public abstract class TestTimeReporterExtension {
 
     public abstract Property<Boolean> getShowSlowestTests();
 
+    public abstract Property<Boolean> getShowHistogram();
+
+    public abstract Property<Boolean> getColoredOutput();
+
     public abstract Property<Boolean> getExperimentalFeatures();
 }

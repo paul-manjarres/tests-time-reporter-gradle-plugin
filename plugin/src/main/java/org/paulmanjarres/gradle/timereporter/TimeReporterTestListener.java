@@ -12,6 +12,12 @@ import org.gradle.api.tasks.testing.TestResult;
 import org.paulmanjarres.gradle.timereporter.model.TestSuiteTimeExecutionStats;
 import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
 
+/**
+ * A test listener to check the results on each test.
+ *
+ * @author <a href="mailto:paul.manjarres@gmail.com">Jean Paul Manjarres Correal</a>
+ * @since 0.1.0
+ */
 public class TimeReporterTestListener implements TestListener {
 
     private final Set<TestTimeExecutionStats> stats;
