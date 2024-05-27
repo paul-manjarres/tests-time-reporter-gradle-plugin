@@ -1,5 +1,7 @@
 package org.paulmanjarres.gradle.timereporter;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.gradle.api.DefaultTask;
@@ -65,7 +67,6 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     public void process() {
 
-        final Set<TestTimeExecutionStats> stats = this.getTestListener().get().getStats();
         int binSize = this.getBinSize().get();
         int slowThreshold = this.getSlowThreshold().get();
         int longestTestCount = this.getLongestTestsCount().get();
@@ -88,13 +89,23 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         this.getLogger().debug("showHistogram = {}", showHistogram);
         this.getLogger().debug("binSize = {}", binSize);
 
+        final Set<TestTimeExecutionStats> stats = this.getTestListener().get().getStats();
+        final Map<String, TestSuiteTimeExecutionStats> sStats =
+                this.getTestListener().get().getSuiteStats();
         final int totalTestCount = stats.size();
+
+        java.util.Optional<String> globalSuiteKey = sStats.keySet().stream()
+                .filter(s -> s.toLowerCase().contains("gradle test run"))
+                .findFirst();
+
+        final long totalSuiteTime =
+                globalSuiteKey.map(s -> sStats.get(s).getDuration().toMillis()).orElse(1L);
 
         cUtils.setColorEnabled(coloredOutput);
 
         this.getLogger().lifecycle(cUtils.printInYellow("========== Tests Time Execution Statistics =========="));
         this.getLogger().lifecycle("Total Test Count: [{}]", totalTestCount);
-        // TODO: Total Time,
+        this.getLogger().lifecycle("Total Test time: [{}ms]", totalSuiteTime);
         logNewLine();
 
         if (showGroupByResult) {
@@ -105,7 +116,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         if (showGroupByClass) {
             this.getLogger().lifecycle("Tests grouped by Class - Max Results: [{}]", maxResultsForGroupByClass);
-            GroupedResultsByClass.from(stats, maxResultsForGroupByClass)
+            GroupedResultsByClass.fromSuiteStats(new HashSet<>(sStats.values()), maxResultsForGroupByClass)
                     .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
             logNewLine();
         }
@@ -117,60 +128,69 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
             final Histogram h = Histogram.from(stats, conf);
             this.getLogger()
                     .lifecycle(
-                            "Histogram - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms]",
+                            "Histogram - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms] - TotalSuite Time: [{}ms]",
                             h.getCount(),
                             binSize,
-                            slowThreshold);
+                            slowThreshold,
+                            totalSuiteTime);
 
             for (int i = 0; i < h.getBuckets(); i++) {
                 this.getLogger()
                         .lifecycle(
-                                " [{} - {}ms] : {} [ {}]",
+                                " [{} - {}ms] : ({})  [ {}]  - {}ms - {}%",
                                 String.format("%4d", i * binSize),
                                 String.format("%4d", (i + 1) * binSize),
                                 String.format("%4d", h.getValues()[i]),
-                                String.format("%5.2f%%", h.getPercentages()[i]));
+                                String.format("%5.2f%%", h.getPercentages()[i]),
+                                String.format("%4d", h.getDuration()[i]),
+                                String.format("%5.2f", h.getDuration()[i] * 100 / (double) totalSuiteTime));
             }
 
             this.getLogger()
                     .lifecycle(
-                            " [{}] : {} [ {}]",
+                            " [{}] : ({})  [ {}]  - {}ms - {}%",
                             cUtils.printInRed(String.format("     > %4dms", h.getMaxValue())),
-                            String.format("%4d", h.getSlowTestCount()),
-                            cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())));
+                            cUtils.printInRed(String.format("%4d", h.getSlowTestCount())),
+                            cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())),
+                            String.format("%4d", h.getSlowTestDuration()),
+                            String.format("%5.2f", h.getSlowTestDuration() * 100 / (double) totalSuiteTime));
+
             logNewLine();
             this.getLogger()
                     .lifecycle(
-                            "{} of the tests ({}) were considered slow. ",
+                            "{} of the tests ({}) were considered slow. Approximately {} of total time.",
                             cUtils.printInYellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
-                            h.getSlowTestCount());
-
+                            h.getSlowTestCount(),
+                            cUtils.printInYellow(
+                                    String.format("%3.2f%%", h.getSlowTestDuration() * 100 / (double) totalSuiteTime)));
             logNewLine();
         }
 
         if (showSlowestTests) {
+
+            final List<TestTimeExecutionStats> group = GroupedBySlowestTests.from(stats, slowThreshold);
             this.getLogger()
                     .lifecycle(
-                            "Slowest tests - Threshold: [{}ms] - Max Results: [{}]", slowThreshold, longestTestCount);
-            GroupedBySlowestTests.from(stats, longestTestCount, slowThreshold)
-                    .forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
+                            "Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
+                            group.size(),
+                            slowThreshold,
+                            longestTestCount);
+            group.stream().limit(longestTestCount).forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
             logNewLine();
         }
 
-        // Suite stats
         if (experimentalFeatures) {
-            final Map<String, TestSuiteTimeExecutionStats> sStats =
-                    this.getTestListener().get().getSuiteStats();
-
             sStats.forEach((k, v) -> this.getLogger()
                     .lifecycle(
-                            "{} - # Tests: {} -  Duration: {}ms Init Time: {}ms",
+                            "Key:[{}] - Name: [{}] - #Tests: [{}] - Duration:[{}ms] - InitTime: [{}ms]",
+                            k,
                             v.getClassName(),
                             v.getNumberOfTests(),
                             v.getDuration().toMillis(),
                             v.getInitTimeMillis()));
-
             logNewLine();
+
+            sStats.values().forEach(t -> this.getLogger().lifecycle(t.toString()));
         }
     }
 
@@ -183,8 +203,12 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     public String formatGroupResultsByClass(GroupedResultsByClass r) {
         return String.format(
-                " - %5.2f%% (%3d/%3d) : %s ",
-                r.getPercentage() * 100, r.getCount(), r.getTotal(), r.getTestClassName());
+                " - %5.2f%% (%3d/%3d) Time: [%4dms] : %s",
+                r.getPercentage() * 100,
+                r.getTestCountPerSuite(),
+                r.getTotalTestCount(),
+                r.getSuiteExecutionTime(),
+                r.getTestClassName());
     }
 
     public String formatSlowestTest(TestTimeExecutionStats r) {

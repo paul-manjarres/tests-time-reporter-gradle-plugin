@@ -27,13 +27,14 @@ plugins {
 
 // These are the default values, can be omitted if they work for you
 testTimeReporter{
-    longestTestsCount = 5         // The max amount of results to show in slowest test section. 
+    longestTestsCount = 5         // The max amount of results to show in the slowest test section. 
+    maxResultsForGroupByClass = 5 // The max amount of results to show in the group-by-class test section.
     binSizeInMillis = 100         // Size of each bin in the histogram
     slowThresholdInMillis = 200   // The threshold to consider a test as 'slow'
     showGroupByClass = true       // Enables/disables test grouped by class section
     showGroupByResult = true      // Enables/disables test grouped by result section
     showSlowestTests = true       // Enables/disables slowest test section
     showHistogram = true          // Enables/disables histogram section
-    coloredOutput = true          // If true, output will use colors. 
+    coloredOutput = true          // If true, output will use colors.
 }
 ```

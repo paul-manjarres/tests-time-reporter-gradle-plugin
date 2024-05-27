@@ -31,21 +31,27 @@ public class TimeReporterTestListener implements TestListener {
     @Override
     public void beforeSuite(TestDescriptor suite) {
         this.suiteStats.put(
-                suite.getClassName(),
-                new TestSuiteTimeExecutionStats(
-                        suite.getName(), suite.getDisplayName(), null, 0, 0, LocalDateTime.now()));
+                suite.getName(),
+                TestSuiteTimeExecutionStats.builder()
+                        .suiteName(suite.getName())
+                        .className(suite.getClassName())
+                        .duration(null)
+                        .numberOfTests(0)
+                        .initTimeMillis(0L)
+                        .startTime(LocalDateTime.now())
+                        .build());
     }
 
     @Override
     public void afterSuite(TestDescriptor suite, TestResult result) {
-        Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
-        TestSuiteTimeExecutionStats sStats = this.suiteStats.get(suite.getClassName());
+        final Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
+        final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(suite.getName());
         sStats.setDuration(duration);
     }
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {
-        TestSuiteTimeExecutionStats sStats = this.suiteStats.get(testDescriptor.getClassName());
+        final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(testDescriptor.getClassName());
         sStats.setNumberOfTests(sStats.getNumberOfTests() + 1);
         if (sStats.getInitTimeMillis() == 0) {
             sStats.setInitTimeMillis(

@@ -8,7 +8,7 @@ plugins {
     id("com.diffplug.spotless") version "6.25.0"
 }
 
-version = "0.4.0"
+version = "0.5.0"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 
