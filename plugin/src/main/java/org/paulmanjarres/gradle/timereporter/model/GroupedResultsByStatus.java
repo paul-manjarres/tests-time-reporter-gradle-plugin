@@ -1,5 +1,6 @@
 package org.paulmanjarres.gradle.timereporter.model;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +25,8 @@ public class GroupedResultsByStatus {
                         e.getValue().size() / (double) stats.size(),
                         e.getValue().size(),
                         stats.size()))
+                .sorted(Comparator.comparing(GroupedResultsByStatus::getPercentage)
+                        .reversed())
                 .collect(Collectors.toList());
     }
 }

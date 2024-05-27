@@ -1,5 +1,8 @@
 package org.paulmanjarres.gradle.timereporter.utils;
 
+import lombok.Setter;
+
+@Setter
 public class ConsoleUtils {
 
     public enum Color {
@@ -22,10 +25,6 @@ public class ConsoleUtils {
     private boolean colorEnabled;
 
     public ConsoleUtils(boolean colorEnabled) {
-        this.colorEnabled = colorEnabled;
-    }
-
-    public void setColorEnabled(boolean colorEnabled) {
         this.colorEnabled = colorEnabled;
     }
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5.0
+* Changes in formatting. 
+
 ## v0.4.0
 * Changes in output formatting.
 * Changes in documentation.

@@ -9,12 +9,11 @@ public class GroupedBySlowestTests {
 
     private GroupedBySlowestTests() {}
 
-    public static List<TestTimeExecutionStats> from(Set<TestTimeExecutionStats> stats, int limit, int threshold) {
+    public static List<TestTimeExecutionStats> from(Set<TestTimeExecutionStats> stats, int threshold) {
         return stats.stream()
                 .sorted(Comparator.comparing(TestTimeExecutionStats::getDuration)
                         .reversed())
                 .filter(r -> r.getDuration().toMillis() >= threshold)
-                .limit(limit)
                 .collect(Collectors.toList());
     }
 }

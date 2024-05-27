@@ -9,26 +9,35 @@ public class Histogram {
     private int bucketSize;
     private int[] values;
     private double[] percentages;
+    private long[] duration;
     private int maxValue;
     private int minValue;
     private int slowTestCount;
     private double slowTestPercentage;
+    private long slowTestDuration;
     private int count;
+    private long totalTime;
 
     public static Histogram from(Set<TestTimeExecutionStats> stats, HistogramConfig config) {
         int numberOfBins = config.getMaxValue() / config.getBucketSize();
         int[] histogram = new int[numberOfBins];
         double[] percentages = new double[numberOfBins];
+        long[] duration = new long[numberOfBins];
         int slowTestCount = 0;
+        long slowTestDuration = 0L;
         int count = stats.size();
+        long totalTime = 0L;
 
         for (TestTimeExecutionStats t : stats) {
             int targetBin = (int) Math.floor(t.getDuration().toMillis() / (double) config.getBucketSize());
             if (targetBin >= numberOfBins) {
                 slowTestCount++;
+                slowTestDuration += t.getDuration().toMillis();
             } else {
                 histogram[targetBin]++;
+                duration[targetBin] += t.getDuration().toMillis();
             }
+            totalTime += t.getDuration().toMillis();
         }
 
         for (int i = 0; i < histogram.length; i++) {
@@ -40,9 +49,12 @@ public class Histogram {
         h.setMaxValue(config.getMaxValue());
         h.setValues(histogram);
         h.setPercentages(percentages);
+        h.setDuration(duration);
         h.setSlowTestCount(slowTestCount);
         h.setSlowTestPercentage((double) slowTestCount * 100 / count);
+        h.setSlowTestDuration(slowTestDuration);
         h.setCount(stats.size());
+        h.setTotalTime(totalTime);
         return h;
     }
 
