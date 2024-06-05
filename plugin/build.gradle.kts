@@ -6,6 +6,7 @@ plugins {
     jacoco
     id("com.gradle.plugin-publish") version "1.2.1"
     id("com.diffplug.spotless") version "6.25.0"
+    id("io.github.paul-manjarres.test-time-reporter") version "0.5.0"
 }
 
 version = "0.5.0"
@@ -97,4 +98,8 @@ afterEvaluate {
     tasks.spotlessCheck {
         dependsOn(tasks.spotlessApply)
     }
+}
+
+testTimeReporter {
+    experimentalFeatures = true
 }
