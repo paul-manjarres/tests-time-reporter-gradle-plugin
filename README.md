@@ -22,7 +22,7 @@ In your build.gradle:
 
 ```kotlin
 plugins {
-    id("io.github.paul-manjarres.test-time-reporter") version "0.4.0"
+    id("io.github.paul-manjarres.test-time-reporter") version "0.6.0"
 }
 
 // These are the default values, can be omitted if they work for you
