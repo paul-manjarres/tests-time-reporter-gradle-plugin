@@ -2,10 +2,7 @@ package org.paulmanjarres.gradle.timereporter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestListener;
 import org.gradle.api.tasks.testing.TestResult;
@@ -30,16 +27,19 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void beforeSuite(TestDescriptor suite) {
-        this.suiteStats.put(
-                suite.getName(),
-                TestSuiteTimeExecutionStats.builder()
-                        .suiteName(suite.getName())
-                        .className(suite.getClassName())
-                        .duration(null)
-                        .numberOfTests(0)
-                        .initTimeMillis(0L)
-                        .startTime(LocalDateTime.now())
-                        .build());
+        final Optional<String> parentName = Optional.ofNullable(
+                suite.getParent() != null ? suite.getParent().getName() : null);
+        final TestSuiteTimeExecutionStats st = TestSuiteTimeExecutionStats.builder()
+                .suiteName(suite.getName())
+                .className(suite.getClassName())
+                .parentName(parentName)
+                .duration(null)
+                .numberOfTests(0)
+                .initTimeMillis(0L)
+                .startTime(LocalDateTime.now())
+                .build();
+
+        this.suiteStats.put(suite.getName(), st);
     }
 
     @Override
@@ -47,6 +47,9 @@ public class TimeReporterTestListener implements TestListener {
         final Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
         final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(suite.getName());
         sStats.setDuration(duration);
+        //        System.out.println("** SuiteABC: " + suite.getName() + " - parent: "
+        //                + suite.getParent().getName() + " - class: "
+        //                + suite.getParent().getClassName());
     }
 
     @Override

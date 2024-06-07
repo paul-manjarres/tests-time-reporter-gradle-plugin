@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -134,13 +135,16 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                             slowThreshold,
                             totalSuiteTime);
 
+            this.getLogger().lifecycle("================================================");
+
             for (int i = 0; i < h.getBuckets(); i++) {
                 this.getLogger()
                         .lifecycle(
-                                " [{} - {}ms] : ({})  [ {}]  - {}ms - {}%",
+                                " [{} - {}ms] : ({}/{}) - [{}]  - {}ms - {}%",
                                 String.format("%4d", i * binSize),
                                 String.format("%4d", (i + 1) * binSize),
                                 String.format("%4d", h.getValues()[i]),
+                                String.format("%4d", h.getCount()),
                                 String.format("%5.2f%%", h.getPercentages()[i]),
                                 String.format("%4d", h.getDuration()[i]),
                                 String.format("%5.2f", h.getDuration()[i] * 100 / (double) totalSuiteTime));
@@ -148,9 +152,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
             this.getLogger()
                     .lifecycle(
-                            " [{}] : ({})  [ {}]  - {}ms - {}%",
+                            " [{}] : ({}/{}) - [{}]  - {}ms - {}%",
                             cUtils.printInRed(String.format("     > %4dms", h.getMaxValue())),
                             cUtils.printInRed(String.format("%4d", h.getSlowTestCount())),
+                            cUtils.printInRed(String.format("%4d", h.getCount())),
                             cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())),
                             String.format("%4d", h.getSlowTestDuration()),
                             String.format("%5.2f", h.getSlowTestDuration() * 100 / (double) totalSuiteTime));
@@ -180,6 +185,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         }
 
         if (experimentalFeatures) {
+            this.getLogger().lifecycle("================================================");
+            this.getLogger().lifecycle("====== EXPERIMENTAL =====");
+            this.getLogger().lifecycle("================================================");
             sStats.forEach((k, v) -> this.getLogger()
                     .lifecycle(
                             "Key:[{}] - Name: [{}] - #Tests: [{}] - Duration:[{}ms] - InitTime: [{}ms]",
@@ -191,6 +199,18 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
             logNewLine();
 
             sStats.values().forEach(t -> this.getLogger().lifecycle(t.toString()));
+
+            this.logNewLine();
+            this.getLogger().lifecycle("Test suites grouped by parent:");
+
+            sStats.values().stream()
+                    .collect(Collectors.groupingBy(TestSuiteTimeExecutionStats::getParentName))
+                    .forEach((key, value) -> {
+                        this.getLogger().lifecycle("Key: {} Values: {}", key, value);
+                        logNewLine();
+                    });
+
+            this.getLogger().lifecycle("================================================");
         }
     }
 
