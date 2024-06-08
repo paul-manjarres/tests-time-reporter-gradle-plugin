@@ -1,6 +1,7 @@
 import com.diffplug.spotless.LineEnding
 
 plugins {
+    `idea`
     `java-gradle-plugin`
     `maven-publish`
     jacoco
@@ -9,7 +10,7 @@ plugins {
     id("io.github.paul-manjarres.test-time-reporter") version "0.5.0"
 }
 
-version = "0.6.0"
+version = "0.7-SNAPSHOT"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 
@@ -97,6 +98,13 @@ tasks.jacocoTestReport {
 afterEvaluate {
     tasks.spotlessCheck {
         dependsOn(tasks.spotlessApply)
+    }
+}
+
+idea {
+    module {
+        testSourceDirs.addAll(functionalTestSourceSet.java.srcDirs)
+        testResourceDirs.addAll(functionalTestSourceSet.resources.srcDirs)
     }
 }
 
