@@ -6,8 +6,8 @@ import java.util.*;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestListener;
 import org.gradle.api.tasks.testing.TestResult;
-import org.paulmanjarres.gradle.timereporter.model.TestSuiteTimeExecutionStats;
-import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
+import org.paulmanjarres.gradle.timereporter.model.TestExecution;
+import org.paulmanjarres.gradle.timereporter.model.TestSuite;
 
 /**
  * A test listener to check the results on each test.
@@ -17,8 +17,8 @@ import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
  */
 public class TimeReporterTestListener implements TestListener {
 
-    private final Set<TestTimeExecutionStats> stats;
-    private final Map<String, TestSuiteTimeExecutionStats> suiteStats;
+    private final Set<TestExecution> stats;
+    private final Map<String, TestSuite> suiteStats;
 
     public TimeReporterTestListener() {
         stats = new HashSet<>();
@@ -27,10 +27,10 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void beforeSuite(TestDescriptor suite) {
-        final Optional<String> parentName = Optional.ofNullable(
-                suite.getParent() != null ? suite.getParent().getName() : null);
-        final TestSuiteTimeExecutionStats st = TestSuiteTimeExecutionStats.builder()
-                .suiteName(suite.getName())
+        final String parentName = suite.getParent() != null ? suite.getParent().getName() : "root";
+
+        final TestSuite st = TestSuite.builder()
+                .name(suite.getName())
                 .className(suite.getClassName())
                 .parentName(parentName)
                 .duration(null)
@@ -40,21 +40,25 @@ public class TimeReporterTestListener implements TestListener {
                 .build();
 
         this.suiteStats.put(suite.getName(), st);
+
+        //        if (suiteStats.containsKey(parentName)) {
+        //            TestSuite parent = suiteStats.get(parentName);
+        //            if (st.isGradleTestRun() || st.isGradleTestExecutor()) {
+        //                parent.addChildSuite(st);
+        //            }
+        //        }
     }
 
     @Override
     public void afterSuite(TestDescriptor suite, TestResult result) {
         final Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
-        final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(suite.getName());
+        final TestSuite sStats = this.suiteStats.get(suite.getName());
         sStats.setDuration(duration);
-        //        System.out.println("** SuiteABC: " + suite.getName() + " - parent: "
-        //                + suite.getParent().getName() + " - class: "
-        //                + suite.getParent().getClassName());
     }
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {
-        final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(testDescriptor.getClassName());
+        final TestSuite sStats = this.suiteStats.get(testDescriptor.getClassName());
         sStats.setNumberOfTests(sStats.getNumberOfTests() + 1);
         if (sStats.getInitTimeMillis() == 0) {
             sStats.setInitTimeMillis(
@@ -64,18 +68,19 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
-        this.stats.add(new TestTimeExecutionStats(
+        this.stats.add(new TestExecution(
                 testDescriptor.getClassName(),
                 testDescriptor.getName(),
                 Duration.ofMillis(result.getEndTime() - result.getStartTime()),
-                result.getResultType()));
+                result.getResultType(),
+                null));
     }
 
-    public Set<TestTimeExecutionStats> getStats() {
+    public Set<TestExecution> getStats() {
         return new HashSet<>(stats);
     }
 
-    public Map<String, TestSuiteTimeExecutionStats> getSuiteStats() {
+    public Map<String, TestSuite> getSuiteStats() {
         return new HashMap<>(suiteStats);
     }
 }

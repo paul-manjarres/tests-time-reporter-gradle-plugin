@@ -90,9 +90,8 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         this.getLogger().debug("showHistogram = {}", showHistogram);
         this.getLogger().debug("binSize = {}", binSize);
 
-        final Set<TestTimeExecutionStats> stats = this.getTestListener().get().getStats();
-        final Map<String, TestSuiteTimeExecutionStats> sStats =
-                this.getTestListener().get().getSuiteStats();
+        final Set<TestExecution> stats = this.getTestListener().get().getStats();
+        final Map<String, TestSuite> sStats = this.getTestListener().get().getSuiteStats();
         final int totalTestCount = stats.size();
 
         java.util.Optional<String> globalSuiteKey = sStats.keySet().stream()
@@ -173,7 +172,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         if (showSlowestTests) {
 
-            final List<TestTimeExecutionStats> group = GroupedBySlowestTests.from(stats, slowThreshold);
+            final List<TestExecution> group = GroupedBySlowestTests.from(stats, slowThreshold);
             this.getLogger()
                     .lifecycle(
                             "Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
@@ -185,32 +184,68 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         }
 
         if (experimentalFeatures) {
-            this.getLogger().lifecycle("================================================");
-            this.getLogger().lifecycle("====== EXPERIMENTAL =====");
-            this.getLogger().lifecycle("================================================");
-            sStats.forEach((k, v) -> this.getLogger()
-                    .lifecycle(
-                            "Key:[{}] - Name: [{}] - #Tests: [{}] - Duration:[{}ms] - InitTime: [{}ms]",
-                            k,
-                            v.getClassName(),
-                            v.getNumberOfTests(),
-                            v.getDuration().toMillis(),
-                            v.getInitTimeMillis()));
-            logNewLine();
 
-            sStats.values().forEach(t -> this.getLogger().lifecycle(t.toString()));
+            try {
+                this.getLogger().lifecycle("================================================");
+                this.getLogger().lifecycle("====== EXPERIMENTAL =====");
+                this.getLogger().lifecycle("================================================");
+                sStats.forEach((k, v) -> this.getLogger()
+                        .lifecycle(
+                                "Key:[{}] - Name: [{}] - #Tests: [{}] - Duration:[{}ms] - InitTime: [{}ms]",
+                                k,
+                                v.getClassName(),
+                                v.getNumberOfTests(),
+                                v.getDuration().toMillis(),
+                                v.getInitTimeMillis()));
+                logNewLine();
 
-            this.logNewLine();
-            this.getLogger().lifecycle("Test suites grouped by parent:");
+                this.getLogger().lifecycle("Suites values: ");
+                sStats.values().forEach(t -> this.getLogger().lifecycle(t.toString()));
 
-            sStats.values().stream()
-                    .collect(Collectors.groupingBy(TestSuiteTimeExecutionStats::getParentName))
-                    .forEach((key, value) -> {
-                        this.getLogger().lifecycle("Key: {} Values: {}", key, value);
-                        logNewLine();
-                    });
+                this.logNewLine();
+                this.getLogger().lifecycle("Test suites grouped by parent:");
 
-            this.getLogger().lifecycle("================================================");
+                Map<String, List<TestSuite>> suitesGroupedByParentName =
+                        sStats.values().stream().collect(Collectors.groupingBy(TestSuite::getParentName));
+
+                suitesGroupedByParentName.forEach((key, value) -> {
+                    this.getLogger().lifecycle("Parent: [{}] - Children: {}", key, value);
+                    logNewLine();
+                });
+
+                logNewLine();
+                this.getLogger().lifecycle("Root suites");
+                List<TestSuite> rootSuites = suitesGroupedByParentName.get("root");
+
+                //                TestSuite rootSuite = sStats.get("root");
+                //
+                //                // Root suite can be null ???
+                //
+                //                this.getLogger()
+                //                        .lifecycle(
+                //                                "Root: {} - Duration: {}ms",
+                //                                rootSuite.getName(),
+                //                                rootSuite.getDuration().toMillis());
+
+                rootSuites.forEach(s -> {
+                    this.getLogger()
+                            .lifecycle(
+                                    "Name: {} - Duration: {}ms",
+                                    s.getName(),
+                                    s.getDuration().toMillis());
+
+                    suitesGroupedByParentName.get(s.getName()).forEach(t -> this.getLogger()
+                            .lifecycle(
+                                    "   - Name: {} - TestCount: {} - Duration: {}ms",
+                                    t.getName(),
+                                    t.getNumberOfTests(),
+                                    t.getDuration().toMillis()));
+                });
+
+                this.getLogger().lifecycle("================================================");
+            } catch (Exception e) {
+                this.getLogger().error("ERROR: {}", e.getMessage(), e);
+            }
         }
     }
 
@@ -231,13 +266,13 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 r.getTestClassName());
     }
 
-    public String formatSlowestTest(TestTimeExecutionStats r) {
+    public String formatSlowestTest(TestExecution r) {
         return String.format(
                 "[%4d ms] - %s - %s.%s ",
                 r.getDuration().toMillis(),
                 cUtils.print(r.getResult().toString(), getConsoleTextColorBy(r.getResult())),
-                r.getTestClassName(),
-                r.getTestName());
+                r.getClassName(),
+                r.getName());
     }
 
     public void logNewLine() {

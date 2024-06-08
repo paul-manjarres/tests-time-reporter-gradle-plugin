@@ -23,15 +23,14 @@ public class GroupedResultsByClass {
     double suiteExecutionTimePercentage;
     long initTime;
 
-    public static List<GroupedResultsByClass> fromSuiteStats(Set<TestSuiteTimeExecutionStats> stats, int limit) {
+    public static List<GroupedResultsByClass> fromSuiteStats(Set<TestSuite> stats, int limit) {
 
-        int totalTestCount = stats.stream()
-                .mapToInt(TestSuiteTimeExecutionStats::getNumberOfTests)
-                .sum();
+        int totalTestCount =
+                stats.stream().mapToInt(TestSuite::getNumberOfTests).sum();
 
         final long totalSuiteTime = stats.stream()
                 .filter(s -> s.getClassName() == null)
-                .filter(s -> s.getSuiteName().toLowerCase().contains("gradle test run"))
+                .filter(s -> s.getName().toLowerCase().contains("gradle test run"))
                 .findFirst()
                 .map(s -> s.getDuration().toMillis())
                 .orElse(0L);

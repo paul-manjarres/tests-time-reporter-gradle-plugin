@@ -9,17 +9,19 @@ import org.gradle.api.tasks.testing.TestResult;
 @Value
 @AllArgsConstructor
 @ToString
-public class TestTimeExecutionStats {
+public class TestExecution {
 
     /** Test class name */
-    String testClassName;
+    String className;
 
     /** The name of the test */
-    String testName;
+    String name;
 
     /** The duration of the Test */
     Duration duration;
 
     /** Result of the test */
     TestResult.ResultType result;
+
+    TestSuite parentSuite;
 }

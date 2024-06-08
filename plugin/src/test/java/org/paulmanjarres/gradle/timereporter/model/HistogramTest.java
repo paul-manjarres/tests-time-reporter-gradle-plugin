@@ -1,7 +1,6 @@
 package org.paulmanjarres.gradle.timereporter.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -19,15 +18,15 @@ class HistogramTest {
     @Test
     void test1() {
 
-        final Set<TestTimeExecutionStats> set = new HashSet<>();
-        set.add(new TestTimeExecutionStats("t1", "t1", Duration.of(101, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t2", "t2", Duration.of(150, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t3", "t3", Duration.of(450, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t4", "t4", Duration.of(690, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t5", "t4", Duration.of(800, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(50, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(45, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(387, ChronoUnit.MILLIS), SUCCESS));
+        final Set<TestExecution> set = new HashSet<>();
+        set.add(new TestExecution("t1", "t1", Duration.of(101, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t2", "t2", Duration.of(150, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t3", "t3", Duration.of(450, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t4", "t4", Duration.of(690, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t5", "t4", Duration.of(800, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t6", "t6", Duration.of(50, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t6", "t6", Duration.of(45, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t6", "t6", Duration.of(387, ChronoUnit.MILLIS), SUCCESS, null));
 
         final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
         conf.setBucketSize(100);
@@ -55,10 +54,10 @@ class HistogramTest {
 
     @Test
     void test2() {
-        final Set<TestTimeExecutionStats> set = new HashSet<>();
-        set.add(new TestTimeExecutionStats("t4", "t4", Duration.of(690, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t5", "t4", Duration.of(800, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(7000, ChronoUnit.MILLIS), SUCCESS));
+        final Set<TestExecution> set = new HashSet<>();
+        set.add(new TestExecution("t4", "t4", Duration.of(690, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t5", "t4", Duration.of(800, ChronoUnit.MILLIS), SUCCESS, null));
+        set.add(new TestExecution("t6", "t6", Duration.of(7000, ChronoUnit.MILLIS), SUCCESS, null));
 
         final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
         conf.setBucketSize(200);
