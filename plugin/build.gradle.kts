@@ -46,6 +46,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertJ)
+    testImplementation(libs.mockito)
 }
 
 // Add a source set for the functional test suite
