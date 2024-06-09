@@ -32,11 +32,9 @@ public class TestSuite {
     /** The approximate start time of the suite */
     private LocalDateTime startTime;
 
-    @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Set<TestSuite> suiteChildren;
 
-    @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Set<TestExecution> testChildren;
 

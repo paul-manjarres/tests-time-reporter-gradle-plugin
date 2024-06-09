@@ -41,12 +41,12 @@ public class TimeReporterTestListener implements TestListener {
 
         this.suiteStats.put(suite.getName(), st);
 
-        //        if (suiteStats.containsKey(parentName)) {
-        //            TestSuite parent = suiteStats.get(parentName);
-        //            if (st.isGradleTestRun() || st.isGradleTestExecutor()) {
-        //                parent.addChildSuite(st);
-        //            }
-        //        }
+        if (suiteStats.containsKey(parentName)) {
+            TestSuite parent = suiteStats.get(parentName);
+            //            if (st.isGradleTestRun() || st.isGradleTestExecutor()) {
+            parent.addChildSuite(st);
+            //            }
+        }
     }
 
     @Override
