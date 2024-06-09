@@ -1,21 +1,19 @@
 package org.paulmanjarres.gradle.timereporter;
 
-
-import org.gradle.api.tasks.testing.TestDescriptor;
-import org.gradle.api.tasks.testing.TestResult;
-import org.junit.jupiter.api.Test;
-import org.paulmanjarres.gradle.timereporter.model.TestSuite;
-
-import java.time.Duration;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import org.gradle.api.tasks.testing.TestDescriptor;
+import org.gradle.api.tasks.testing.TestResult;
+import org.junit.jupiter.api.Test;
+import org.paulmanjarres.gradle.timereporter.model.GradleTest;
+
 class TimeReporterTestListenerTest {
 
     @Test
-    void whenNewSuiteExecuted_then_isRegisteredByListener(){
+    void whenNewSuiteExecuted_then_isRegisteredByListener() {
 
         // GIVEN
         TimeReporterTestListener tl = new TimeReporterTestListener();
@@ -34,9 +32,8 @@ class TimeReporterTestListenerTest {
 
         // THEN
         assertThat(tl.getSuiteStats()).isNotNull().isNotEmpty().hasSize(1);
-        final TestSuite suite = tl.getSuiteStats().get("suite1");
+        final GradleTest suite = tl.getSuiteStats().get("suite1");
         assertThat(suite).isNotNull();
         assertThat(suite.getDuration()).isEqualByComparingTo(Duration.ofMillis(1000));
     }
-
 }

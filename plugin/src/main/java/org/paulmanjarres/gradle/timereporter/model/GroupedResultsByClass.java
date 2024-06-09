@@ -23,12 +23,17 @@ public class GroupedResultsByClass {
     double suiteExecutionTimePercentage;
     long initTime;
 
-    public static List<GroupedResultsByClass> fromSuiteStats(Set<TestSuite> stats, int limit) {
+    public static List<GroupedResultsByClass> fromSuiteStats(Set<GradleTest> stats, int limit) {
 
-        int totalTestCount =
-                stats.stream().mapToInt(TestSuite::getNumberOfTests).sum();
+        int totalTestCount = stats.stream()
+                .filter(GradleTestSuite.class::isInstance)
+                .map(GradleTestSuite.class::cast)
+                .mapToInt(GradleTestSuite::getNumberOfTests)
+                .sum();
 
         final long totalSuiteTime = stats.stream()
+                .filter(GradleTestSuite.class::isInstance)
+                .map(GradleTestSuite.class::cast)
                 .filter(s -> s.getClassName() == null)
                 .filter(s -> s.getName().toLowerCase().contains("gradle test run"))
                 .findFirst()
@@ -36,6 +41,7 @@ public class GroupedResultsByClass {
                 .orElse(0L);
 
         return stats.stream()
+                .map(GradleTestSuite.class::cast)
                 .filter(s -> s.getClassName() != null)
                 .map(t -> GroupedResultsByClass.builder()
                         .testClassName(t.getClassName())
