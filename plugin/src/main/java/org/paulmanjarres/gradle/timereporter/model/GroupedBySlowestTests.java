@@ -9,9 +9,9 @@ public class GroupedBySlowestTests {
 
     private GroupedBySlowestTests() {}
 
-    public static List<GradleTestInstance> from(Set<GradleTestInstance> stats, int threshold) {
+    public static List<GradleTestCase> from(Set<GradleTestCase> stats, int threshold) {
         return stats.stream()
-                .sorted(Comparator.comparing(GradleTestInstance::getDuration).reversed())
+                .sorted(Comparator.comparing(GradleTestCase::getDuration).reversed())
                 .filter(r -> r.getDuration().toMillis() >= threshold)
                 .collect(Collectors.toList());
     }

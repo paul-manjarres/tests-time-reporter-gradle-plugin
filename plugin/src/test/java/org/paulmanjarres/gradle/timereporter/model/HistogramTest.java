@@ -17,44 +17,44 @@ class HistogramTest {
     @Test
     void test1() {
 
-        final Set<GradleTestInstance> set = new HashSet<>();
+        final Set<GradleTestCase> set = new HashSet<>();
 
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(101))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t2")
                 .duration(Duration.ofMillis(150))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t3")
                 .duration(Duration.ofMillis(450))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t4")
                 .duration(Duration.ofMillis(690))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(800))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(50))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(45))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(387))
                 .result(SUCCESS)
@@ -86,18 +86,18 @@ class HistogramTest {
 
     @Test
     void test2() {
-        final Set<GradleTestInstance> set = new HashSet<>();
-        set.add(GradleTestInstance.builder()
+        final Set<GradleTestCase> set = new HashSet<>();
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(690))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(800))
                 .result(SUCCESS)
                 .build());
-        set.add(GradleTestInstance.builder()
+        set.add(GradleTestCase.builder()
                 .name("t1")
                 .duration(Duration.ofMillis(7000))
                 .result(SUCCESS)

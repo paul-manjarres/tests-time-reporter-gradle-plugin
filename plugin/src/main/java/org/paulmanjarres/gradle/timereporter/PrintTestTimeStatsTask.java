@@ -63,7 +63,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         try {
             process();
         } catch (Exception e) {
-            getProject().getLogger().error("Exception: {}", e.getMessage(), e);
+            getProject().getLogger().error("PrintTestTimeStatsTask - Exception: {}", e.getMessage(), e);
         }
     }
 
@@ -93,10 +93,11 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         this.getLogger().debug("showHistogram = {}", showHistogram);
         this.getLogger().debug("binSize = {}", binSize);
 
-        final Set<GradleTestInstance> stats = this.getTestListener().get().getStats();
+        final Set<GradleTestCase> stats = this.getTestListener().get().getStats();
         final Map<String, GradleTest> sStats = this.getTestListener().get().getSuiteStats();
         final int totalTestCount = stats.size();
 
+        // TODO Revisar
         java.util.Optional<String> globalSuiteKey = sStats.keySet().stream()
                 .filter(s -> s.toLowerCase().contains("gradle test run"))
                 .findFirst();
@@ -132,6 +133,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
             final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
             conf.setBucketSize(binSize);
             conf.setMaxValue(slowThreshold);
+            // TODO histograma per run
             final Histogram h = Histogram.from(stats, conf);
             this.getLogger()
                     .lifecycle(
@@ -179,7 +181,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         if (showSlowestTests) {
 
-            final List<GradleTestInstance> group = GroupedBySlowestTests.from(stats, slowThreshold);
+            final List<GradleTestCase> group = GroupedBySlowestTests.from(stats, slowThreshold);
             this.getLogger()
                     .lifecycle(
                             "Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
@@ -211,34 +213,63 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                         this.getLogger().lifecycle(" - Parent: [{}] - Children ({}): {}", key, value.size(), value));
 
                 logNewLine();
+
                 this.getLogger().lifecycle("Root children suites");
                 List<GradleTest> rootSuites = suitesGroupedByParentName.get("root");
 
-                rootSuites.forEach(s -> {
+                for (GradleTest s : rootSuites) {
                     this.getLogger()
                             .lifecycle(
                                     "Name: {} - Duration: {}ms",
                                     s.getName(),
                                     s.getDuration().toMillis());
 
-                    if (s instanceof GradleTestExecutor) {
-                        s.getChildren().forEach(t -> this.getLogger()
+                    for (GradleTest g : s.getChildren()) {
+                        this.getLogger()
                                 .lifecycle(
-                                        "   - Name: {} - ChildrenSuiteCount: {} - Duration: {}ms",
-                                        t.getName(),
-                                        t.getChildren() == null
-                                                ? 0
-                                                : t.getChildren().size(),
-                                        t.getDuration().toMillis()));
-                    }
+                                        "   - Name: {} - Result:{} - Duration: {}ms",
+                                        g.getName(),
+                                        g.getResult(),
+                                        g.getDuration().toMillis());
 
-                    suitesGroupedByParentName.get(s.getName()).forEach(t -> this.getLogger()
-                            .lifecycle(
-                                    "   - Name: {} - TestCount: - Duration: {}ms",
-                                    t.getName(),
-                                    //                                                        t.getNumberOfTests(),
-                                    t.getDuration().toMillis()));
-                });
+                        for (GradleTest h : g.getChildren()) {
+                            this.getLogger()
+                                    .lifecycle(
+                                            "     - Name: {} - Result:{} - Duration: {}ms",
+                                            h.getName(),
+                                            h.getResult(),
+                                            h.getDuration().toMillis());
+                        }
+                    }
+                }
+
+                //                rootSuites.forEach(s -> {
+                //                    this.getLogger()
+                //                            .lifecycle(
+                //                                    "Name: {} - Duration: {}ms",
+                //                                    s.getName(),
+                //                                    s.getDuration().toMillis());
+                //
+                //                    if (s instanceof GradleTestExecutor) {
+                //                        s.getChildren().forEach(t -> this.getLogger()
+                //                                .lifecycle(
+                //                                        "   - Name: {} - ChildrenSuiteCount: {} - Duration: {}ms",
+                //                                        t.getName(),
+                //                                        t.getChildren() == null
+                //                                                ? 0
+                //                                                : t.getChildren().size(),
+                //                                        t.getDuration().toMillis()));
+                //                    }
+                //
+                //                    suitesGroupedByParentName.get(s.getName()).forEach(t -> this.getLogger()
+                //                            .lifecycle(
+                //                                    "   - Name: {} - Result:{} - Duration: {}ms",
+                //                                    t.getName(),
+                //                                    t.getResult(),
+                //                                    //
+                // t.getNumberOfTests(),
+                //                                    t.getDuration().toMillis()));
+                //                });
 
                 this.getLogger().lifecycle("================================================");
             } catch (Exception e) {
@@ -264,7 +295,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 r.getTestClassName());
     }
 
-    public String formatSlowestTest(GradleTestInstance r) {
+    public String formatSlowestTest(GradleTestCase r) {
 
         return String.format(
                 "[%4d ms] - %s - %s.%s ",

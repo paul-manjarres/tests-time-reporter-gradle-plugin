@@ -12,6 +12,7 @@ public class GradleTestSuite extends GradleTest {
     private String className;
 
     /** The total number of tests in this suite */
+    @Setter(AccessLevel.NONE)
     private int numberOfTests;
 
     /** The estimated time between the start of the suite and the start of the first test */
@@ -28,5 +29,9 @@ public class GradleTestSuite extends GradleTest {
                 + (this.getChildren() == null ? 0 : this.getChildren().size())
                 + ", className='" + this.getClassName()
                 + "')";
+    }
+
+    public void increaseNumberOfTestsBy(int increment) {
+        this.numberOfTests = this.numberOfTests + increment;
     }
 }

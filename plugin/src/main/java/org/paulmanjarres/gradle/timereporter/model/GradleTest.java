@@ -1,12 +1,12 @@
 package org.paulmanjarres.gradle.timereporter.model;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
+import org.gradle.api.tasks.testing.TestResult;
 
 @Data
 @EqualsAndHashCode
@@ -20,7 +20,13 @@ public abstract class GradleTest {
     private Duration duration;
 
     /** The approximate start time */
-    private LocalDateTime startTime;
+    private long startTime;
+
+    /** The approximate end time */
+    private long endTime;
+
+    /** Result of the test */
+    TestResult.ResultType result;
 
     @EqualsAndHashCode.Exclude
     private GradleTest parent;
