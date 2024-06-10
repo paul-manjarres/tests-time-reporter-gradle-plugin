@@ -14,12 +14,11 @@ import lombok.experimental.SuperBuilder;
 public class GradleTestExecutor extends GradleTest {
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GradleTestExecutor(");
-        sb.append("name='");
-        sb.append(this.getName());
-        sb.append("', childrenSize=");
-        sb.append(this.getChildren() == null ? 0 : this.getChildren().size());
-        sb.append(')');
-        return sb.toString();
+
+        final String duration =
+                this.getDuration() == null ? "null" : "" + this.getDuration().toMillis();
+        return "GradleTestExecutor(name='" + this.getName() + "', duration=" + duration + "ms, childrenSize="
+                + (this.getChildren() == null ? 0 : this.getChildren().size())
+                + ')';
     }
 }

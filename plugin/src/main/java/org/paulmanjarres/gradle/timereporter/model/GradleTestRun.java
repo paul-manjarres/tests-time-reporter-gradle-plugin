@@ -8,14 +8,18 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 public class GradleTestRun extends GradleTest {
+
+    public static final GradleTestRun ROOT =
+            GradleTestRun.builder().name("root").build();
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GradleTestRun(");
-        sb.append("name='");
-        sb.append(this.getName());
-        sb.append("', childrenSize=");
-        sb.append(this.getChildren() == null ? 0 : this.getChildren().size());
-        sb.append(')');
-        return sb.toString();
+
+        final String duration =
+                this.getDuration() == null ? "null" : "" + this.getDuration().toMillis();
+        return "GradleTestRun(" + "name='" + this.getName()
+                + "', duration=" + duration + "ms, childrenSize="
+                + (this.getChildren() == null ? 0 : this.getChildren().size())
+                + ')';
     }
 }

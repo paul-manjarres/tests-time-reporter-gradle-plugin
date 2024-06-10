@@ -27,47 +27,22 @@ public class TimeReporterTestListener implements TestListener {
     @Override
     public void beforeSuite(TestDescriptor suite) {
         final String parentName = suite.getParent() != null ? suite.getParent().getName() : "root";
+        final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
 
         GradleTest gSuite = null;
-
-        GradleTest parent = suiteStats.get(parentName);
-        if (parent == null) {
-            parent = GradleTestRun.builder().name("root").build();
-        }
-
-        if (suite.getName() != null && suite.getName().toLowerCase().startsWith("gradle test executor")) {
-            gSuite = GradleTestExecutor.builder()
-                    .name(suite.getName())
-                    .parent(parent)
-                    .duration(null)
-                    .startTime(LocalDateTime.now())
-                    .build();
-        } else if (suite.getName() != null && suite.getName().toLowerCase().startsWith("gradle test run")) {
-            gSuite = GradleTestRun.builder()
-                    .name(suite.getName())
-                    .parent(parent)
-                    .duration(null)
-                    .startTime(LocalDateTime.now())
-                    .build();
+        if (isGradleTestExecutor(suite.getName())) {
+            gSuite = createGradleTestExecutor(suite);
+        } else if (isGradleTestRun(suite.getName())) {
+            gSuite = createGradleTestRun(suite);
         } else {
-
-            gSuite = GradleTestSuite.builder()
-                    .name(suite.getName())
-                    .className(suite.getClassName())
-                    .parent(parent)
-                    .duration(null)
-                    .numberOfTests(0)
-                    .initTimeMillis(0L)
-                    .startTime(LocalDateTime.now())
-                    .build();
+            gSuite = createGradleTestSuite(suite);
         }
+
+        gSuite.setParent(parent);
 
         this.suiteStats.put(suite.getName(), gSuite);
-
-        if (suiteStats.containsKey(parentName)) {
-            if (!(parent instanceof GradleTestInstance)) {
-                parent.addChildren(gSuite);
-            }
+        if (suiteStats.containsKey(parentName) && !(parent instanceof GradleTestInstance)) {
+            parent.addChildren(gSuite);
         }
     }
 
@@ -92,22 +67,48 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
-
         final GradleTestInstance testInstance = GradleTestInstance.builder()
                 .className(testDescriptor.getClassName())
                 .name(testDescriptor.getName())
                 .duration(Duration.ofMillis(result.getEndTime() - result.getStartTime()))
                 .result(result.getResultType())
                 .build();
-
         this.stats.add(testInstance);
+    }
 
-        //        this.stats.add(new GradleTestInstance(
-        //                testDescriptor.getClassName(),
-        //                testDescriptor.getName(),
-        //                Duration.ofMillis(result.getEndTime() - result.getStartTime()),
-        //                result.getResultType(),
-        //                null));
+    public GradleTestSuite createGradleTestSuite(TestDescriptor suite) {
+        return GradleTestSuite.builder()
+                .name(suite.getName())
+                .className(suite.getClassName())
+                .duration(null)
+                .numberOfTests(0)
+                .initTimeMillis(0L)
+                .startTime(LocalDateTime.now())
+                .build();
+    }
+
+    public GradleTestRun createGradleTestRun(TestDescriptor suite) {
+        return GradleTestRun.builder()
+                .name(suite.getName())
+                .duration(null)
+                .startTime(LocalDateTime.now())
+                .build();
+    }
+
+    public GradleTestExecutor createGradleTestExecutor(TestDescriptor suite) {
+        return GradleTestExecutor.builder()
+                .name(suite.getName())
+                .duration(null)
+                .startTime(LocalDateTime.now())
+                .build();
+    }
+
+    public boolean isGradleTestExecutor(String name) {
+        return name != null && name.toLowerCase().startsWith("gradle test executor");
+    }
+
+    public boolean isGradleTestRun(String name) {
+        return name != null && name.toLowerCase().startsWith("gradle test run");
     }
 
     public Set<GradleTestInstance> getStats() {

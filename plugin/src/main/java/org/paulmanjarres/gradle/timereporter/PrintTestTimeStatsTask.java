@@ -196,13 +196,6 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 this.getLogger().lifecycle("================================================");
                 this.getLogger().lifecycle("====== EXPERIMENTAL =====");
                 this.getLogger().lifecycle("================================================");
-                sStats.forEach((k, v) -> this.getLogger()
-                        .lifecycle(
-                                "Key:[{}] - Name: [{}] - #Tests: [] - Duration:[{}ms] - InitTime: [{}ms]",
-                                k,
-                                v.getName(),
-                                v.getDuration().toMillis()));
-                logNewLine();
 
                 this.getLogger().lifecycle("Suites values: ");
                 sStats.values().forEach(t -> this.getLogger().lifecycle(" - " + t.toString()));
@@ -214,10 +207,8 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                         .collect(Collectors.groupingBy(s ->
                                 s.getParent() == null ? "root" : s.getParent().getName()));
 
-                suitesGroupedByParentName.forEach((key, value) -> {
-                    this.getLogger().lifecycle("Parent: [{}] - Children ({}): {}", key, value.size(), value);
-                    logNewLine();
-                });
+                suitesGroupedByParentName.forEach((key, value) ->
+                        this.getLogger().lifecycle(" - Parent: [{}] - Children ({}): {}", key, value.size(), value));
 
                 logNewLine();
                 this.getLogger().lifecycle("Root children suites");

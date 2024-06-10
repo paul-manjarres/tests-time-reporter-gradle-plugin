@@ -16,4 +16,17 @@ public class GradleTestSuite extends GradleTest {
 
     /** The estimated time between the start of the suite and the start of the first test */
     private long initTimeMillis;
+
+    @Override
+    public String toString() {
+
+        final String duration =
+                this.getDuration() == null ? "null" : "" + this.getDuration().toMillis();
+        return "GradleTestSuite(" + "name='" + this.getName()
+                + "', duration=" + duration
+                + "ms, numberOfTests=" + this.getNumberOfTests() + ", childrenSize="
+                + (this.getChildren() == null ? 0 : this.getChildren().size())
+                + ", className='" + this.getClassName()
+                + "')";
+    }
 }
