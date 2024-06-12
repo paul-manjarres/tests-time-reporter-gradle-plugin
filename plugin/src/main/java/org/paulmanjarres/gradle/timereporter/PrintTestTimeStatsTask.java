@@ -96,8 +96,6 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         final Set<GradleTestCase> stats = this.getTestListener().get().getStats();
         final Map<String, GradleTest> sStats = this.getTestListener().get().getSuiteStats();
 
-        //        final long totalSuiteTime = 0L; // TODO revisar
-
         cUtils.setColorEnabled(coloredOutput);
 
         this.getLogger().lifecycle(cUtils.printInYellow("========== Tests Time Execution Statistics =========="));
