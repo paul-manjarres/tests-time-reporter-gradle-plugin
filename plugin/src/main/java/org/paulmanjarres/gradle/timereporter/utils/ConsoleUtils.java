@@ -55,4 +55,11 @@ public class ConsoleUtils {
         }
         return Color.YELLOW.code + str + Color.CLEAR.code;
     }
+
+    public String magenta(String str) {
+        if (!colorEnabled) {
+            return str;
+        }
+        return print(str, Color.MAGENTA);
+    }
 }

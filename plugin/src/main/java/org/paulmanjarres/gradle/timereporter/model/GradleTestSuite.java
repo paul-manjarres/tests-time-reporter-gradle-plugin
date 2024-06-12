@@ -1,5 +1,8 @@
 package org.paulmanjarres.gradle.timereporter.model;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -12,7 +15,6 @@ public class GradleTestSuite extends GradleTest {
     private String className;
 
     /** The total number of tests in this suite */
-    @Setter(AccessLevel.NONE)
     private int numberOfTests;
 
     /** The estimated time between the start of the suite and the start of the first test */
@@ -31,7 +33,18 @@ public class GradleTestSuite extends GradleTest {
                 + "')";
     }
 
-    public void increaseNumberOfTestsBy(int increment) {
-        this.numberOfTests = this.numberOfTests + increment;
+    @Override
+    public int countTests() {
+        return this.numberOfTests;
+    }
+
+    @Override
+    public Set<GradleTestCase> getTestCases() {
+        return this.getChildren().stream().map(GradleTestCase.class::cast).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<GradleTestSuite> getTestSuites() {
+        return Collections.emptySet();
     }
 }

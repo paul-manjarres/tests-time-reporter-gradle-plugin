@@ -14,12 +14,18 @@ public class GradleTestRun extends GradleTest {
 
     @Override
     public String toString() {
-
         final String duration =
                 this.getDuration() == null ? "null" : "" + this.getDuration().toMillis();
         return "GradleTestRun(" + "name='" + this.getName()
                 + "', duration=" + duration + "ms, childrenSize="
                 + (this.getChildren() == null ? 0 : this.getChildren().size())
                 + ')';
+    }
+
+    public String getSimplifiedName() {
+        if (this.getName() == null || !this.getName().contains("Gradle Test Run")) {
+            return this.getName();
+        }
+        return this.getName().substring("Gradle Test Run".length()).trim();
     }
 }

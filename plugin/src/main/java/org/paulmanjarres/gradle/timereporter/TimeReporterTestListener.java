@@ -31,20 +31,20 @@ public class TimeReporterTestListener implements TestListener {
         final String parentName = suite.getParent() != null ? suite.getParent().getName() : "root";
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
 
-        GradleTest gSuite = null;
+        GradleTest gtSuite = null;
         if (isGradleTestExecutor(suite.getName())) {
-            gSuite = createGradleTestExecutor(suite);
+            gtSuite = createGradleTestExecutor(suite);
         } else if (isGradleTestRun(suite.getName())) {
-            gSuite = createGradleTestRun(suite);
+            gtSuite = createGradleTestRun(suite);
         } else {
-            gSuite = createGradleTestSuite(suite);
+            gtSuite = createGradleTestSuite(suite);
         }
 
-        gSuite.setParent(parent);
+        gtSuite.setParent(parent);
 
-        this.suiteStats.put(suite.getName(), gSuite);
+        this.suiteStats.put(suite.getName(), gtSuite);
         if (suiteStats.containsKey(parentName) && !(parent instanceof GradleTestCase)) {
-            parent.addChildren(gSuite);
+            parent.addChildren(gtSuite);
         }
     }
 
@@ -56,12 +56,16 @@ public class TimeReporterTestListener implements TestListener {
         sStats.setStartTime(result.getStartTime());
         sStats.setEndTime(result.getEndTime());
         sStats.setResult(result.getResultType());
+
+        if (sStats instanceof GradleTestSuite) {
+            final GradleTestSuite gtSuite = (GradleTestSuite) sStats;
+            gtSuite.setNumberOfTests((int) result.getTestCount());
+        }
     }
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {
         final GradleTestSuite suite = (GradleTestSuite) this.suiteStats.get(testDescriptor.getClassName());
-        suite.increaseNumberOfTestsBy(1);
         if (suite.getInitTimeMillis() == 0) {
             suite.setInitTimeMillis(System.currentTimeMillis() - suite.getStartTime());
         }
@@ -76,30 +80,26 @@ public class TimeReporterTestListener implements TestListener {
                 .result(result.getResultType())
                 .build();
         this.stats.add(testInstance);
+
+        final String parentName =
+                testDescriptor.getParent() != null ? testDescriptor.getParent().getName() : "root";
+        final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
+        parent.addChildren(testInstance);
     }
 
     public GradleTestSuite createGradleTestSuite(TestDescriptor suite) {
         return GradleTestSuite.builder()
                 .name(suite.getName())
                 .className(suite.getClassName())
-                .duration(null)
-                //                .numberOfTests(0)
-                //                .initTimeMillis(0L)
                 .build();
     }
 
     public GradleTestRun createGradleTestRun(TestDescriptor suite) {
-        return GradleTestRun.builder()
-                .name(suite.getName())
-                //                .duration(null)
-                .build();
+        return GradleTestRun.builder().name(suite.getName()).build();
     }
 
     public GradleTestExecutor createGradleTestExecutor(TestDescriptor suite) {
-        return GradleTestExecutor.builder()
-                .name(suite.getName())
-                //                .duration(null)
-                .build();
+        return GradleTestExecutor.builder().name(suite.getName()).build();
     }
 
     public boolean isGradleTestExecutor(String name) {
