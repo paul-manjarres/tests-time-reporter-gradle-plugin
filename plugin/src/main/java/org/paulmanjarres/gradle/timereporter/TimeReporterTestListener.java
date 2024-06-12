@@ -1,13 +1,14 @@
 package org.paulmanjarres.gradle.timereporter;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestListener;
 import org.gradle.api.tasks.testing.TestResult;
-import org.paulmanjarres.gradle.timereporter.model.TestSuiteTimeExecutionStats;
-import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
+import org.paulmanjarres.gradle.timereporter.model.*;
 
 /**
  * A test listener to check the results on each test.
@@ -17,8 +18,8 @@ import org.paulmanjarres.gradle.timereporter.model.TestTimeExecutionStats;
  */
 public class TimeReporterTestListener implements TestListener {
 
-    private final Set<TestTimeExecutionStats> stats;
-    private final Map<String, TestSuiteTimeExecutionStats> suiteStats;
+    private final Set<GradleTestCase> stats;
+    private final Map<String, GradleTest> suiteStats;
 
     public TimeReporterTestListener() {
         stats = new HashSet<>();
@@ -27,55 +28,93 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void beforeSuite(TestDescriptor suite) {
-        final Optional<String> parentName = Optional.ofNullable(
-                suite.getParent() != null ? suite.getParent().getName() : null);
-        final TestSuiteTimeExecutionStats st = TestSuiteTimeExecutionStats.builder()
-                .suiteName(suite.getName())
-                .className(suite.getClassName())
-                .parentName(parentName)
-                .duration(null)
-                .numberOfTests(0)
-                .initTimeMillis(0L)
-                .startTime(LocalDateTime.now())
-                .build();
+        final String parentName = suite.getParent() != null ? suite.getParent().getName() : "root";
+        final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
 
-        this.suiteStats.put(suite.getName(), st);
+        GradleTest gtSuite = null;
+        if (isGradleTestExecutor(suite.getName())) {
+            gtSuite = createGradleTestExecutor(suite);
+        } else if (isGradleTestRun(suite.getName())) {
+            gtSuite = createGradleTestRun(suite);
+        } else {
+            gtSuite = createGradleTestSuite(suite);
+        }
+
+        gtSuite.setParent(parent);
+
+        this.suiteStats.put(suite.getName(), gtSuite);
+        if (suiteStats.containsKey(parentName) && !(parent instanceof GradleTestCase)) {
+            parent.addChildren(gtSuite);
+        }
     }
 
     @Override
     public void afterSuite(TestDescriptor suite, TestResult result) {
         final Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
-        final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(suite.getName());
+        final GradleTest sStats = this.suiteStats.get(suite.getName());
         sStats.setDuration(duration);
-        //        System.out.println("** SuiteABC: " + suite.getName() + " - parent: "
-        //                + suite.getParent().getName() + " - class: "
-        //                + suite.getParent().getClassName());
+        sStats.setStartTime(result.getStartTime());
+        sStats.setEndTime(result.getEndTime());
+        sStats.setResult(result.getResultType());
+
+        if (sStats instanceof GradleTestSuite) {
+            final GradleTestSuite gtSuite = (GradleTestSuite) sStats;
+            gtSuite.setNumberOfTests((int) result.getTestCount());
+        }
     }
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {
-        final TestSuiteTimeExecutionStats sStats = this.suiteStats.get(testDescriptor.getClassName());
-        sStats.setNumberOfTests(sStats.getNumberOfTests() + 1);
-        if (sStats.getInitTimeMillis() == 0) {
-            sStats.setInitTimeMillis(
-                    Duration.between(sStats.getStartTime(), LocalDateTime.now()).toMillis());
+        final GradleTestSuite suite = (GradleTestSuite) this.suiteStats.get(testDescriptor.getClassName());
+        if (suite.getInitTimeMillis() == 0) {
+            suite.setInitTimeMillis(System.currentTimeMillis() - suite.getStartTime());
         }
     }
 
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
-        this.stats.add(new TestTimeExecutionStats(
-                testDescriptor.getClassName(),
-                testDescriptor.getName(),
-                Duration.ofMillis(result.getEndTime() - result.getStartTime()),
-                result.getResultType()));
+        final GradleTestCase testInstance = GradleTestCase.builder()
+                .className(testDescriptor.getClassName())
+                .name(testDescriptor.getName())
+                .duration(Duration.ofMillis(result.getEndTime() - result.getStartTime()))
+                .result(result.getResultType())
+                .build();
+        this.stats.add(testInstance);
+
+        final String parentName =
+                testDescriptor.getParent() != null ? testDescriptor.getParent().getName() : "root";
+        final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
+        parent.addChildren(testInstance);
     }
 
-    public Set<TestTimeExecutionStats> getStats() {
+    public GradleTestSuite createGradleTestSuite(TestDescriptor suite) {
+        return GradleTestSuite.builder()
+                .name(suite.getName())
+                .className(suite.getClassName())
+                .build();
+    }
+
+    public GradleTestRun createGradleTestRun(TestDescriptor suite) {
+        return GradleTestRun.builder().name(suite.getName()).build();
+    }
+
+    public GradleTestExecutor createGradleTestExecutor(TestDescriptor suite) {
+        return GradleTestExecutor.builder().name(suite.getName()).build();
+    }
+
+    public boolean isGradleTestExecutor(String name) {
+        return name != null && name.toLowerCase().startsWith("gradle test executor");
+    }
+
+    public boolean isGradleTestRun(String name) {
+        return name != null && name.toLowerCase().startsWith("gradle test run");
+    }
+
+    public Set<GradleTestCase> getStats() {
         return new HashSet<>(stats);
     }
 
-    public Map<String, TestSuiteTimeExecutionStats> getSuiteStats() {
+    public Map<String, GradleTest> getSuiteStats() {
         return new HashMap<>(suiteStats);
     }
 }

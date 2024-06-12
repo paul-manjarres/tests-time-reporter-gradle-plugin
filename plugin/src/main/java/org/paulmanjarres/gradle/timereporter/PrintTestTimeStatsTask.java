@@ -1,6 +1,5 @@
 package org.paulmanjarres.gradle.timereporter;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +60,11 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     @TaskAction
     public void print() {
-        process();
+        try {
+            process();
+        } catch (Exception e) {
+            getProject().getLogger().error("PrintTestTimeStatsTask - Exception: {}", e.getMessage(), e);
+        }
     }
 
     final ConsoleUtils cUtils = new ConsoleUtils(true);
@@ -90,127 +93,198 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         this.getLogger().debug("showHistogram = {}", showHistogram);
         this.getLogger().debug("binSize = {}", binSize);
 
-        final Set<TestTimeExecutionStats> stats = this.getTestListener().get().getStats();
-        final Map<String, TestSuiteTimeExecutionStats> sStats =
-                this.getTestListener().get().getSuiteStats();
-        final int totalTestCount = stats.size();
-
-        java.util.Optional<String> globalSuiteKey = sStats.keySet().stream()
-                .filter(s -> s.toLowerCase().contains("gradle test run"))
-                .findFirst();
-
-        final long totalSuiteTime =
-                globalSuiteKey.map(s -> sStats.get(s).getDuration().toMillis()).orElse(1L);
+        final Set<GradleTestCase> stats = this.getTestListener().get().getStats();
+        final Map<String, GradleTest> sStats = this.getTestListener().get().getSuiteStats();
 
         cUtils.setColorEnabled(coloredOutput);
 
         this.getLogger().lifecycle(cUtils.printInYellow("========== Tests Time Execution Statistics =========="));
-        this.getLogger().lifecycle("Total Test Count: [{}]", totalTestCount);
-        this.getLogger().lifecycle("Total Test time: [{}ms]", totalSuiteTime);
+
+        final Map<String, List<GradleTest>> suitesByParentName = sStats.values().stream()
+                .collect(Collectors.groupingBy(s -> s.getParent().getName()));
+
+        final List<GradleTest> runSuites = suitesByParentName.get("root");
+
+        runSuites.forEach(s -> {
+            String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
+            this.getLogger().lifecycle(cUtils.magenta("{}"), name);
+            this.getLogger()
+                    .lifecycle(
+                            "  - Test Count: [{}] - Test time: [{}ms]",
+                            s.countTests(),
+                            s.getDuration().toMillis());
+        });
+
         logNewLine();
 
         if (showGroupByResult) {
             this.getLogger().lifecycle("Tests grouped by Result:");
-            GroupedResultsByStatus.from(stats).forEach(r -> this.getLogger().lifecycle(formatGroupResultsByStatus(r)));
-            logNewLine();
+            runSuites.forEach(s -> {
+                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
+                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
+                GroupedResultsByStatus.from(s.getTestCases())
+                        .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByStatus(r)));
+                logNewLine();
+            });
         }
 
         if (showGroupByClass) {
             this.getLogger().lifecycle("Tests grouped by Class - Max Results: [{}]", maxResultsForGroupByClass);
-            GroupedResultsByClass.fromSuiteStats(new HashSet<>(sStats.values()), maxResultsForGroupByClass)
-                    .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
-            logNewLine();
+
+            runSuites.forEach(s -> {
+                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
+                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
+                GroupedResultsByClass.fromSuiteStats(s.getTestSuites(), maxResultsForGroupByClass)
+                        .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
+                logNewLine();
+            });
         }
 
         if (showHistogram) {
-            final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
-            conf.setBucketSize(binSize);
-            conf.setMaxValue(slowThreshold);
-            final Histogram h = Histogram.from(stats, conf);
-            this.getLogger()
-                    .lifecycle(
-                            "Histogram - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms] - TotalSuite Time: [{}ms]",
-                            h.getCount(),
-                            binSize,
-                            slowThreshold,
-                            totalSuiteTime);
 
-            this.getLogger().lifecycle("================================================");
+            runSuites.forEach(s -> {
+                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
+                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
 
-            for (int i = 0; i < h.getBuckets(); i++) {
+                final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
+                conf.setBucketSize(binSize);
+                conf.setMaxValue(slowThreshold);
+                // TODO histograma per run
+                final Histogram h = Histogram.from(stats, conf);
                 this.getLogger()
                         .lifecycle(
-                                " [{} - {}ms] : ({}/{}) - [{}]  - {}ms - {}%",
-                                String.format("%4d", i * binSize),
-                                String.format("%4d", (i + 1) * binSize),
-                                String.format("%4d", h.getValues()[i]),
-                                String.format("%4d", h.getCount()),
-                                String.format("%5.2f%%", h.getPercentages()[i]),
-                                String.format("%4d", h.getDuration()[i]),
-                                String.format("%5.2f", h.getDuration()[i] * 100 / (double) totalSuiteTime));
-            }
+                                "Histogram - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms] - TotalSuite Time: [{}ms]",
+                                h.getCount(),
+                                binSize,
+                                slowThreshold,
+                                s.getDuration().toMillis());
 
-            this.getLogger()
-                    .lifecycle(
-                            " [{}] : ({}/{}) - [{}]  - {}ms - {}%",
-                            cUtils.printInRed(String.format("     > %4dms", h.getMaxValue())),
-                            cUtils.printInRed(String.format("%4d", h.getSlowTestCount())),
-                            cUtils.printInRed(String.format("%4d", h.getCount())),
-                            cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())),
-                            String.format("%4d", h.getSlowTestDuration()),
-                            String.format("%5.2f", h.getSlowTestDuration() * 100 / (double) totalSuiteTime));
+                this.getLogger().lifecycle("================================================");
 
-            logNewLine();
-            this.getLogger()
-                    .lifecycle(
-                            "{} of the tests ({}) were considered slow. Approximately {} of total time.",
-                            cUtils.printInYellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
-                            h.getSlowTestCount(),
-                            cUtils.printInYellow(
-                                    String.format("%3.2f%%", h.getSlowTestDuration() * 100 / (double) totalSuiteTime)));
-            logNewLine();
+                for (int i = 0; i < h.getBuckets(); i++) {
+                    this.getLogger()
+                            .lifecycle(
+                                    " [{} - {}ms] : ({}/{}) - [{}]  - {}ms - {}%",
+                                    String.format("%4d", i * binSize),
+                                    String.format("%4d", (i + 1) * binSize),
+                                    String.format("%4d", h.getValues()[i]),
+                                    String.format("%4d", h.getCount()),
+                                    String.format("%5.2f%%", h.getPercentages()[i]),
+                                    String.format("%4d", h.getDuration()[i]),
+                                    String.format(
+                                            "%5.2f",
+                                            h.getDuration()[i]
+                                                    * 100
+                                                    / (double) s.getDuration().toMillis()));
+                }
+
+                this.getLogger()
+                        .lifecycle(
+                                " [{}] : ({}/{}) - [{}]  - {}ms - {}%",
+                                cUtils.printInRed(String.format("     > %4dms", h.getMaxValue())),
+                                cUtils.printInRed(String.format("%4d", h.getSlowTestCount())),
+                                cUtils.printInRed(String.format("%4d", h.getCount())),
+                                cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())),
+                                String.format("%4d", h.getSlowTestDuration()),
+                                String.format(
+                                        "%5.2f",
+                                        h.getSlowTestDuration()
+                                                * 100
+                                                / (double) s.getDuration().toMillis()));
+
+                logNewLine();
+                this.getLogger()
+                        .lifecycle(
+                                "{} of the tests ({}) were considered slow. Approximately {} of total time.",
+                                cUtils.printInYellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
+                                h.getSlowTestCount(),
+                                cUtils.printInYellow(String.format(
+                                        "%3.2f%%",
+                                        h.getSlowTestDuration()
+                                                * 100
+                                                / (double) s.getDuration().toMillis())));
+                logNewLine();
+            });
         }
 
         if (showSlowestTests) {
 
-            final List<TestTimeExecutionStats> group = GroupedBySlowestTests.from(stats, slowThreshold);
-            this.getLogger()
-                    .lifecycle(
-                            "Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
-                            group.size(),
-                            slowThreshold,
-                            longestTestCount);
-            group.stream().limit(longestTestCount).forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
-            logNewLine();
+            runSuites.forEach(s -> {
+                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
+                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
+
+                Set<GradleTestCase> testCases = s.getTestCases();
+
+                this.getLogger()
+                        .lifecycle(
+                                "Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
+                                testCases.size(),
+                                slowThreshold,
+                                longestTestCount);
+
+                GroupedBySlowestTests.from(testCases, slowThreshold).stream()
+                        .limit(longestTestCount)
+                        .forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
+
+                logNewLine();
+            });
         }
 
         if (experimentalFeatures) {
-            this.getLogger().lifecycle("================================================");
-            this.getLogger().lifecycle("====== EXPERIMENTAL =====");
-            this.getLogger().lifecycle("================================================");
-            sStats.forEach((k, v) -> this.getLogger()
-                    .lifecycle(
-                            "Key:[{}] - Name: [{}] - #Tests: [{}] - Duration:[{}ms] - InitTime: [{}ms]",
-                            k,
-                            v.getClassName(),
-                            v.getNumberOfTests(),
-                            v.getDuration().toMillis(),
-                            v.getInitTimeMillis()));
-            logNewLine();
 
-            sStats.values().forEach(t -> this.getLogger().lifecycle(t.toString()));
+            try {
+                this.getLogger().lifecycle("================================================");
+                this.getLogger().lifecycle("====== EXPERIMENTAL =====");
+                this.getLogger().lifecycle("================================================");
 
-            this.logNewLine();
-            this.getLogger().lifecycle("Test suites grouped by parent:");
+                this.getLogger().lifecycle("Suites values: ");
+                sStats.values().forEach(t -> this.getLogger().lifecycle(" - " + t.toString()));
 
-            sStats.values().stream()
-                    .collect(Collectors.groupingBy(TestSuiteTimeExecutionStats::getParentName))
-                    .forEach((key, value) -> {
-                        this.getLogger().lifecycle("Key: {} Values: {}", key, value);
-                        logNewLine();
-                    });
+                this.logNewLine();
+                this.getLogger().lifecycle("Test suites grouped by parent:");
 
-            this.getLogger().lifecycle("================================================");
+                Map<String, List<GradleTest>> suitesGroupedByParentName = sStats.values().stream()
+                        .collect(Collectors.groupingBy(s ->
+                                s.getParent() == null ? "root" : s.getParent().getName()));
+
+                suitesGroupedByParentName.forEach((key, value) ->
+                        this.getLogger().lifecycle(" - Parent: [{}] - Children ({}): {}", key, value.size(), value));
+
+                logNewLine();
+
+                this.getLogger().lifecycle("Root children suites");
+                List<GradleTest> rootSuites = suitesGroupedByParentName.get("root");
+
+                for (GradleTest s : rootSuites) {
+                    this.getLogger()
+                            .lifecycle(
+                                    "Name: {} - Duration: {}ms",
+                                    s.getName(),
+                                    s.getDuration().toMillis());
+
+                    for (GradleTest g : s.getChildren()) {
+                        this.getLogger()
+                                .lifecycle(
+                                        "   - Name: {} - Result:{} - Duration: {}ms",
+                                        g.getName(),
+                                        g.getResult(),
+                                        g.getDuration().toMillis());
+
+                        for (GradleTest h : g.getChildren()) {
+                            this.getLogger()
+                                    .lifecycle(
+                                            "     - Name: {} - Result:{} - Duration: {}ms",
+                                            h.getName(),
+                                            h.getResult(),
+                                            h.getDuration().toMillis());
+                        }
+                    }
+                }
+
+                this.getLogger().lifecycle("================================================");
+            } catch (Exception e) {
+                this.getLogger().error("ERROR: {}", e.getMessage(), e);
+            }
         }
     }
 
@@ -231,13 +305,14 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 r.getTestClassName());
     }
 
-    public String formatSlowestTest(TestTimeExecutionStats r) {
+    public String formatSlowestTest(GradleTestCase r) {
+
         return String.format(
                 "[%4d ms] - %s - %s.%s ",
                 r.getDuration().toMillis(),
                 cUtils.print(r.getResult().toString(), getConsoleTextColorBy(r.getResult())),
-                r.getTestClassName(),
-                r.getTestName());
+                r.getClassName(),
+                r.getName());
     }
 
     public void logNewLine() {

@@ -1,10 +1,8 @@
 package org.paulmanjarres.gradle.timereporter.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,15 +17,48 @@ class HistogramTest {
     @Test
     void test1() {
 
-        final Set<TestTimeExecutionStats> set = new HashSet<>();
-        set.add(new TestTimeExecutionStats("t1", "t1", Duration.of(101, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t2", "t2", Duration.of(150, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t3", "t3", Duration.of(450, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t4", "t4", Duration.of(690, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t5", "t4", Duration.of(800, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(50, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(45, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(387, ChronoUnit.MILLIS), SUCCESS));
+        final Set<GradleTestCase> set = new HashSet<>();
+
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(101))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t2")
+                .duration(Duration.ofMillis(150))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t3")
+                .duration(Duration.ofMillis(450))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t4")
+                .duration(Duration.ofMillis(690))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(800))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(50))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(45))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(387))
+                .result(SUCCESS)
+                .build());
 
         final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
         conf.setBucketSize(100);
@@ -55,10 +86,22 @@ class HistogramTest {
 
     @Test
     void test2() {
-        final Set<TestTimeExecutionStats> set = new HashSet<>();
-        set.add(new TestTimeExecutionStats("t4", "t4", Duration.of(690, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t5", "t4", Duration.of(800, ChronoUnit.MILLIS), SUCCESS));
-        set.add(new TestTimeExecutionStats("t6", "t6", Duration.of(7000, ChronoUnit.MILLIS), SUCCESS));
+        final Set<GradleTestCase> set = new HashSet<>();
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(690))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(800))
+                .result(SUCCESS)
+                .build());
+        set.add(GradleTestCase.builder()
+                .name("t1")
+                .duration(Duration.ofMillis(7000))
+                .result(SUCCESS)
+                .build());
 
         final Histogram.HistogramConfig conf = new Histogram.HistogramConfig();
         conf.setBucketSize(200);

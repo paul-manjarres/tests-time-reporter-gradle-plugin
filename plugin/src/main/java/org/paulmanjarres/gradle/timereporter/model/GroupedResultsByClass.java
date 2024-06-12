@@ -23,20 +23,23 @@ public class GroupedResultsByClass {
     double suiteExecutionTimePercentage;
     long initTime;
 
-    public static List<GroupedResultsByClass> fromSuiteStats(Set<TestSuiteTimeExecutionStats> stats, int limit) {
+    public static List<GroupedResultsByClass> fromSuiteStats(Set<GradleTestSuite> stats, int limit) {
 
         int totalTestCount = stats.stream()
-                .mapToInt(TestSuiteTimeExecutionStats::getNumberOfTests)
+                .map(GradleTestSuite.class::cast)
+                .mapToInt(GradleTestSuite::getNumberOfTests)
                 .sum();
 
         final long totalSuiteTime = stats.stream()
+                .map(GradleTestSuite.class::cast)
                 .filter(s -> s.getClassName() == null)
-                .filter(s -> s.getSuiteName().toLowerCase().contains("gradle test run"))
+                .filter(s -> s.getName().toLowerCase().contains("gradle test run"))
                 .findFirst()
                 .map(s -> s.getDuration().toMillis())
                 .orElse(0L);
 
         return stats.stream()
+                .map(GradleTestSuite.class::cast)
                 .filter(s -> s.getClassName() != null)
                 .map(t -> GroupedResultsByClass.builder()
                         .testClassName(t.getClassName())

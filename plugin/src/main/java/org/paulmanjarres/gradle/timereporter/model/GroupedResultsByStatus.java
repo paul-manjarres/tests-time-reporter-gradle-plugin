@@ -18,8 +18,8 @@ public class GroupedResultsByStatus {
     int count;
     int total;
 
-    public static List<GroupedResultsByStatus> from(Set<TestTimeExecutionStats> stats) {
-        return stats.stream().collect(Collectors.groupingBy(TestTimeExecutionStats::getResult)).entrySet().stream()
+    public static List<GroupedResultsByStatus> from(Set<GradleTestCase> stats) {
+        return stats.stream().collect(Collectors.groupingBy(GradleTestCase::getResult)).entrySet().stream()
                 .map(e -> new GroupedResultsByStatus(
                         e.getKey(),
                         e.getValue().size() / (double) stats.size(),
