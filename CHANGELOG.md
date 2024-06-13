@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.8
+
 ## v0.5.0
 * Changes in formatting. 
 
