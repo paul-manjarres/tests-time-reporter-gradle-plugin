@@ -1,5 +1,6 @@
 package org.paulmanjarres.gradle.timereporter;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,8 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.testing.TestResult;
 import org.paulmanjarres.gradle.timereporter.model.*;
+import org.paulmanjarres.gradle.timereporter.model.views.GradleTestTreeView;
+import org.paulmanjarres.gradle.timereporter.model.views.SlowestTestsView;
 import org.paulmanjarres.gradle.timereporter.utils.ConsoleUtils;
 
 public abstract class PrintTestTimeStatsTask extends DefaultTask {
@@ -98,7 +101,8 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         cUtils.setColorEnabled(coloredOutput);
 
-        this.getLogger().lifecycle(cUtils.printInYellow("========== Tests Time Execution Statistics =========="));
+        this.getLogger().lifecycle(cUtils.yellow("========== Tests Time Execution Statistics =========="));
+        logNewLine();
 
         final Map<String, List<GradleTest>> suitesByParentName = sStats.values().stream()
                 .collect(Collectors.groupingBy(s -> s.getParent().getName()));
@@ -128,16 +132,17 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
             });
         }
 
-        if (showGroupByClass) {
-            this.getLogger().lifecycle("Tests grouped by Class - Max Results: [{}]", maxResultsForGroupByClass);
+        // TODO Flag
+        logNewLine();
+        final GradleTestTreeView treeView = new GradleTestTreeView();
+        treeView.printTreeView(new HashSet<>(sStats.values()), cUtils, this.getLogger());
+        logNewLine();
 
-            runSuites.forEach(s -> {
-                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
-                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
-                GroupedResultsByClass.fromSuiteStats(s.getTestSuites(), maxResultsForGroupByClass)
-                        .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByClass(r)));
-                logNewLine();
-            });
+        if (showSlowestTests) {
+            final SlowestTestsView slowestTestsView =
+                    new SlowestTestsView(cUtils, getLogger(), slowThreshold, longestTestCount);
+            slowestTestsView.printView(new HashSet<>(sStats.values()));
+            logNewLine();
         }
 
         if (showHistogram) {
@@ -196,36 +201,13 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 this.getLogger()
                         .lifecycle(
                                 "{} of the tests ({}) were considered slow. Approximately {} of total time.",
-                                cUtils.printInYellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
+                                cUtils.yellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
                                 h.getSlowTestCount(),
-                                cUtils.printInYellow(String.format(
+                                cUtils.yellow(String.format(
                                         "%3.2f%%",
                                         h.getSlowTestDuration()
                                                 * 100
                                                 / (double) s.getDuration().toMillis())));
-                logNewLine();
-            });
-        }
-
-        if (showSlowestTests) {
-
-            runSuites.forEach(s -> {
-                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
-                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
-
-                Set<GradleTestCase> testCases = s.getTestCases();
-
-                this.getLogger()
-                        .lifecycle(
-                                "Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
-                                testCases.size(),
-                                slowThreshold,
-                                longestTestCount);
-
-                GroupedBySlowestTests.from(testCases, slowThreshold).stream()
-                        .limit(longestTestCount)
-                        .forEach(r -> this.getLogger().lifecycle(formatSlowestTest(r)));
-
                 logNewLine();
             });
         }
@@ -251,35 +233,6 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                         this.getLogger().lifecycle(" - Parent: [{}] - Children ({}): {}", key, value.size(), value));
 
                 logNewLine();
-
-                this.getLogger().lifecycle("Root children suites");
-                List<GradleTest> rootSuites = suitesGroupedByParentName.get("root");
-
-                for (GradleTest s : rootSuites) {
-                    this.getLogger()
-                            .lifecycle(
-                                    "Name: {} - Duration: {}ms",
-                                    s.getName(),
-                                    s.getDuration().toMillis());
-
-                    for (GradleTest g : s.getChildren()) {
-                        this.getLogger()
-                                .lifecycle(
-                                        "   - Name: {} - Result:{} - Duration: {}ms",
-                                        g.getName(),
-                                        g.getResult(),
-                                        g.getDuration().toMillis());
-
-                        for (GradleTest h : g.getChildren()) {
-                            this.getLogger()
-                                    .lifecycle(
-                                            "     - Name: {} - Result:{} - Duration: {}ms",
-                                            h.getName(),
-                                            h.getResult(),
-                                            h.getDuration().toMillis());
-                        }
-                    }
-                }
 
                 this.getLogger().lifecycle("================================================");
             } catch (Exception e) {

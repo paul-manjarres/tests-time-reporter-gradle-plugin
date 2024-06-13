@@ -36,30 +36,26 @@ public class ConsoleUtils {
     }
 
     public String printInRed(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
-        return Color.RED.code + str + Color.CLEAR.code;
+        return print(str, Color.RED);
     }
 
-    public String printInGreen(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
-        return Color.GREEN.code + str + Color.CLEAR.code;
+    public String green(String str) {
+        return print(str, Color.GREEN);
     }
 
-    public String printInYellow(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
-        return Color.YELLOW.code + str + Color.CLEAR.code;
+    public String yellow(String str) {
+        return print(str, Color.YELLOW);
     }
 
     public String magenta(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
         return print(str, Color.MAGENTA);
+    }
+
+    public String blue(String str) {
+        return print(str, Color.BLUE);
+    }
+
+    public String cyan(String str) {
+        return print(str, Color.CYAN);
     }
 }
