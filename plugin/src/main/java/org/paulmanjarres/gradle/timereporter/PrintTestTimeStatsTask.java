@@ -10,10 +10,13 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.testing.TestResult;
-import org.paulmanjarres.gradle.timereporter.model.*;
+import org.paulmanjarres.gradle.timereporter.model.GradleTest;
+import org.paulmanjarres.gradle.timereporter.model.GradleTestCase;
+import org.paulmanjarres.gradle.timereporter.model.GradleTestRun;
+import org.paulmanjarres.gradle.timereporter.model.Histogram;
 import org.paulmanjarres.gradle.timereporter.model.views.GradleTestTreeView;
 import org.paulmanjarres.gradle.timereporter.model.views.SlowestTestsView;
+import org.paulmanjarres.gradle.timereporter.model.views.TestResultsView;
 import org.paulmanjarres.gradle.timereporter.utils.ConsoleUtils;
 
 public abstract class PrintTestTimeStatsTask extends DefaultTask {
@@ -98,10 +101,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         final Set<GradleTestCase> stats = this.getTestListener().get().getStats();
         final Map<String, GradleTest> sStats = this.getTestListener().get().getSuiteStats();
-
         cUtils.setColorEnabled(coloredOutput);
 
-        this.getLogger().lifecycle(cUtils.cyan("========== Tests Time Execution Statistics =========="));
+        this.getLogger().lifecycle(cUtils.cyan("========== Tests Time Execution Statistics (BETA) =========="));
         logNewLine();
 
         final Map<String, List<GradleTest>> suitesByParentName = sStats.values().stream()
@@ -116,20 +118,15 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                             "{} - Test Count: [{}] - Test time: [{}ms]",
                             cUtils.magenta(name),
                             s.countTests(),
-                            s.getDuration().toMillis());
+                            String.format("%,6d", s.getDuration().toMillis()));
         });
 
         logNewLine();
 
         if (showGroupByResult) {
-            this.getLogger().lifecycle(cUtils.yellow("Tests grouped by Result:"));
-            runSuites.forEach(s -> {
-                String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
-                this.getLogger().lifecycle(cUtils.magenta("{}"), name);
-                GroupedResultsByStatus.from(s.getTestCases())
-                        .forEach(r -> this.getLogger().lifecycle(formatGroupResultsByStatus(r)));
-                logNewLine();
-            });
+            final TestResultsView view = new TestResultsView(cUtils, getLogger());
+            view.printView(new HashSet<>(sStats.values()));
+            logNewLine();
         }
 
         // TODO Flag
@@ -240,26 +237,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         }
     }
 
-    public String formatGroupResultsByStatus(GroupedResultsByStatus r) {
-        final ConsoleUtils.Color color = getConsoleTextColorBy(r.getType());
-        final String text = String.format(
-                "- %s : %6.2f%% (%3d/%3d)", r.getType(), r.getPercentage() * 100, r.getCount(), r.getTotal());
-        return cUtils.print(text, color);
-    }
-
     public void logNewLine() {
         this.getLogger().lifecycle(" ");
-    }
-
-    private ConsoleUtils.Color getConsoleTextColorBy(TestResult.ResultType type) {
-        if (type == TestResult.ResultType.FAILURE) {
-            return ConsoleUtils.Color.RED;
-        } else if (type == TestResult.ResultType.SUCCESS) {
-            return ConsoleUtils.Color.GREEN;
-        } else if (type == TestResult.ResultType.SKIPPED) {
-            return ConsoleUtils.Color.CYAN;
-        } else {
-            return ConsoleUtils.Color.BLACK;
-        }
     }
 }
