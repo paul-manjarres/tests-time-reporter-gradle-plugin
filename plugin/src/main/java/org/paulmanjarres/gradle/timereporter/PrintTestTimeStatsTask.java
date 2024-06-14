@@ -101,7 +101,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         cUtils.setColorEnabled(coloredOutput);
 
-        this.getLogger().lifecycle(cUtils.yellow("========== Tests Time Execution Statistics =========="));
+        this.getLogger().lifecycle(cUtils.cyan("========== Tests Time Execution Statistics =========="));
         logNewLine();
 
         final Map<String, List<GradleTest>> suitesByParentName = sStats.values().stream()
@@ -111,10 +111,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         runSuites.forEach(s -> {
             String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
-            this.getLogger().lifecycle(cUtils.magenta("{}"), name);
             this.getLogger()
                     .lifecycle(
-                            "  - Test Count: [{}] - Test time: [{}ms]",
+                            "{} - Test Count: [{}] - Test time: [{}ms]",
+                            cUtils.magenta(name),
                             s.countTests(),
                             s.getDuration().toMillis());
         });
@@ -122,7 +122,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         logNewLine();
 
         if (showGroupByResult) {
-            this.getLogger().lifecycle("Tests grouped by Result:");
+            this.getLogger().lifecycle(cUtils.yellow("Tests grouped by Result:"));
             runSuites.forEach(s -> {
                 String name = (s instanceof GradleTestRun) ? ((GradleTestRun) s).getSimplifiedName() : s.getName();
                 this.getLogger().lifecycle(cUtils.magenta("{}"), name);
@@ -133,9 +133,8 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         }
 
         // TODO Flag
-        logNewLine();
-        final GradleTestTreeView treeView = new GradleTestTreeView();
-        treeView.printTreeView(new HashSet<>(sStats.values()), cUtils, this.getLogger());
+        final GradleTestTreeView treeView = new GradleTestTreeView(cUtils, getLogger());
+        treeView.printTreeView(new HashSet<>(sStats.values()));
         logNewLine();
 
         if (showSlowestTests) {
@@ -186,10 +185,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 this.getLogger()
                         .lifecycle(
                                 " [{}] : ({}/{}) - [{}]  - {}ms - {}%",
-                                cUtils.printInRed(String.format("     > %4dms", h.getMaxValue())),
-                                cUtils.printInRed(String.format("%4d", h.getSlowTestCount())),
-                                cUtils.printInRed(String.format("%4d", h.getCount())),
-                                cUtils.printInRed(String.format("%5.2f%%", h.getSlowTestPercentage())),
+                                cUtils.red(String.format("     > %4dms", h.getMaxValue())),
+                                cUtils.red(String.format("%4d", h.getSlowTestCount())),
+                                cUtils.red(String.format("%4d", h.getCount())),
+                                cUtils.red(String.format("%5.2f%%", h.getSlowTestPercentage())),
                                 String.format("%4d", h.getSlowTestDuration()),
                                 String.format(
                                         "%5.2f",
@@ -246,26 +245,6 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         final String text = String.format(
                 "- %s : %6.2f%% (%3d/%3d)", r.getType(), r.getPercentage() * 100, r.getCount(), r.getTotal());
         return cUtils.print(text, color);
-    }
-
-    public String formatGroupResultsByClass(GroupedResultsByClass r) {
-        return String.format(
-                " - %5.2f%% (%3d/%3d) Time: [%4dms] : %s",
-                r.getPercentage() * 100,
-                r.getTestCountPerSuite(),
-                r.getTotalTestCount(),
-                r.getSuiteExecutionTime(),
-                r.getTestClassName());
-    }
-
-    public String formatSlowestTest(GradleTestCase r) {
-
-        return String.format(
-                "[%4d ms] - %s - %s.%s ",
-                r.getDuration().toMillis(),
-                cUtils.print(r.getResult().toString(), getConsoleTextColorBy(r.getResult())),
-                r.getClassName(),
-                r.getName());
     }
 
     public void logNewLine() {

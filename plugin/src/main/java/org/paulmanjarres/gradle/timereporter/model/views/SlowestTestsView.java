@@ -21,39 +21,45 @@ public class SlowestTestsView {
 
     public void printView(Set<GradleTest> set) {
         log.lifecycle(console.yellow("Slowest tests"));
-        log.lifecycle(" ");
 
-        final List<GradleTestRun> testRun = set.stream()
-                .filter(s -> s.getParent() != null && s.getParent().getName().equals("root"))
-                .map(GradleTestRun.class::cast)
-                .collect(Collectors.toList());
+        final List<GradleTestRun> testRun = getGradleTestRun(set);
 
         for (GradleTest run : testRun) {
+            final Set<GradleTestCase> allTestCases = run.getTestCases();
+            final List<GradleTestCase> slowTestList = getSlowestTestCases(allTestCases, slowThreshold);
 
             log.lifecycle(
-                    "{} Slowest tests ({}) - Threshold: [{}ms] - Max Results: [{}]",
+                    "{} SlowTests: [{} out of {}] - Threshold: [{}ms] - Max Results: [{}]",
                     console.magenta(run.getName()),
-                    "XXXX",
+                    slowTestList.size(),
+                    allTestCases.size(),
                     slowThreshold,
                     maxResults);
 
-            run.getTestCases().stream()
-                    .sorted(Comparator.comparing(GradleTestCase::getDuration).reversed())
-                    .filter(r -> r.getDuration().toMillis() >= slowThreshold)
-                    .limit(maxResults)
-                    .forEach(r -> log.lifecycle(formatSlowestTest(r)));
-
+            slowTestList.stream().limit(maxResults).forEach(r -> log.lifecycle(formatSlowestTest(r)));
             log.lifecycle(" ");
         }
     }
 
-    public String formatSlowestTest(GradleTestCase r) {
+    protected List<GradleTestRun> getGradleTestRun(Set<GradleTest> set) {
+        return set.stream()
+                .filter(s -> s.getParent() != null && s.getParent().getName().equals("root"))
+                .map(GradleTestRun.class::cast)
+                .collect(Collectors.toList());
+    }
 
+    protected List<GradleTestCase> getSlowestTestCases(Set<GradleTestCase> set, long threshold) {
+        return set.stream()
+                .sorted(Comparator.comparing(GradleTestCase::getDuration).reversed())
+                .filter(r -> r.getDuration().toMillis() >= threshold)
+                .collect(Collectors.toList());
+    }
+
+    protected String formatSlowestTest(GradleTestCase r) {
         return String.format(
-                "[%4d ms] - %s - %s.%s ",
+                "[%,6d ms] - %s - %s.%s ",
                 r.getDuration().toMillis(),
-                //                console.print(r.getResult().toString(), getConsoleTextColorBy(r.getResult())),
-                console.yellow(r.getResult().toString()),
+                console.print(r.getResult().toString(), console.getColorBy(r.getResult())),
                 r.getClassName(),
                 r.getName());
     }
