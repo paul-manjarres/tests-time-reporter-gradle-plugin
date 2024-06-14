@@ -30,11 +30,12 @@ public class TimeReporterTestListener implements TestListener {
     public void beforeSuite(TestDescriptor suite) {
         final String parentName = suite.getParent() != null ? suite.getParent().getName() : "root";
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
+        final String suiteName = suite.getName();
 
         GradleTest gtSuite = null;
-        if (isGradleTestExecutor(suite.getName())) {
+        if (isGradleTestExecutor(suiteName)) {
             gtSuite = createGradleTestExecutor(suite);
-        } else if (isGradleTestRun(suite.getName())) {
+        } else if (isGradleTestRun(suiteName)) {
             gtSuite = createGradleTestRun(suite);
         } else {
             gtSuite = createGradleTestSuite(suite);
@@ -42,7 +43,9 @@ public class TimeReporterTestListener implements TestListener {
 
         gtSuite.setParent(parent);
 
-        this.suiteStats.put(suite.getName(), gtSuite);
+        gtSuite.setStartTime(System.currentTimeMillis());
+
+        this.suiteStats.put(suiteName, gtSuite);
         if (suiteStats.containsKey(parentName) && !(parent instanceof GradleTestCase)) {
             parent.addChildren(gtSuite);
         }
@@ -53,7 +56,7 @@ public class TimeReporterTestListener implements TestListener {
         final Duration duration = Duration.ofMillis(result.getEndTime() - result.getStartTime());
         final GradleTest sStats = this.suiteStats.get(suite.getName());
         sStats.setDuration(duration);
-        sStats.setStartTime(result.getStartTime());
+        //        sStats.setStartTime(result.getStartTime());
         sStats.setEndTime(result.getEndTime());
         sStats.setResult(result.getResultType());
 
@@ -65,7 +68,9 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {
-        final GradleTestSuite suite = (GradleTestSuite) this.suiteStats.get(testDescriptor.getClassName());
+        //        final GradleTestSuite suite = (GradleTestSuite) this.suiteStats.get(testDescriptor.getClassName());
+        final GradleTestSuite suite =
+                (GradleTestSuite) this.suiteStats.get(testDescriptor.getParent().getName());
         if (suite.getInitTimeMillis() == 0) {
             suite.setInitTimeMillis(System.currentTimeMillis() - suite.getStartTime());
         }
@@ -85,6 +90,7 @@ public class TimeReporterTestListener implements TestListener {
                 testDescriptor.getParent() != null ? testDescriptor.getParent().getName() : "root";
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
         parent.addChildren(testInstance);
+        testInstance.setParent(parent);
     }
 
     public GradleTestSuite createGradleTestSuite(TestDescriptor suite) {

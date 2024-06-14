@@ -1,6 +1,7 @@
 package org.paulmanjarres.gradle.timereporter.utils;
 
 import lombok.Setter;
+import org.gradle.api.tasks.testing.TestResult;
 
 @Setter
 public class ConsoleUtils {
@@ -35,31 +36,39 @@ public class ConsoleUtils {
         return color.code + str + Color.CLEAR.code;
     }
 
-    public String printInRed(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
-        return Color.RED.code + str + Color.CLEAR.code;
+    public String red(String str) {
+        return print(str, Color.RED);
     }
 
-    public String printInGreen(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
-        return Color.GREEN.code + str + Color.CLEAR.code;
+    public String green(String str) {
+        return print(str, Color.GREEN);
     }
 
-    public String printInYellow(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
-        return Color.YELLOW.code + str + Color.CLEAR.code;
+    public String yellow(String str) {
+        return print(str, Color.YELLOW);
     }
 
     public String magenta(String str) {
-        if (!colorEnabled) {
-            return str;
-        }
         return print(str, Color.MAGENTA);
+    }
+
+    public String blue(String str) {
+        return print(str, Color.BLUE);
+    }
+
+    public String cyan(String str) {
+        return print(str, Color.CYAN);
+    }
+
+    public ConsoleUtils.Color getColorBy(TestResult.ResultType type) {
+        if (type == TestResult.ResultType.FAILURE) {
+            return ConsoleUtils.Color.RED;
+        } else if (type == TestResult.ResultType.SUCCESS) {
+            return ConsoleUtils.Color.GREEN;
+        } else if (type == TestResult.ResultType.SKIPPED) {
+            return ConsoleUtils.Color.CYAN;
+        } else {
+            return ConsoleUtils.Color.BLACK;
+        }
     }
 }

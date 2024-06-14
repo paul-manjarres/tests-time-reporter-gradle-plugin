@@ -21,19 +21,6 @@ public class GradleTestSuite extends GradleTest {
     private long initTimeMillis;
 
     @Override
-    public String toString() {
-
-        final String duration =
-                this.getDuration() == null ? "null" : "" + this.getDuration().toMillis();
-        return "GradleTestSuite(" + "name='" + this.getName()
-                + "', duration=" + duration
-                + "ms, numberOfTests=" + this.getNumberOfTests() + ", childrenSize="
-                + (this.getChildren() == null ? 0 : this.getChildren().size())
-                + ", className='" + this.getClassName()
-                + "')";
-    }
-
-    @Override
     public int countTests() {
         return this.numberOfTests;
     }
@@ -46,5 +33,18 @@ public class GradleTestSuite extends GradleTest {
     @Override
     public Set<GradleTestSuite> getTestSuites() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public String toString() {
+        final String duration =
+                this.getDuration() == null ? "null" : this.getDuration().toMillis() + "ms";
+        return "GradleTestSuite(" + "name='" + this.getName()
+                + "', duration=" + duration
+                + ", initTime=" + initTimeMillis
+                + ", numberOfTests=" + this.getNumberOfTests() + ", childrenSize="
+                + (this.getChildren() == null ? 0 : this.getChildren().size())
+                + ", className='" + this.getClassName()
+                + "')";
     }
 }

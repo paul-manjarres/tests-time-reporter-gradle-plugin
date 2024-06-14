@@ -9,6 +9,7 @@ import lombok.ToString;
 import lombok.Value;
 import org.gradle.api.tasks.testing.TestResult;
 
+@Deprecated
 @AllArgsConstructor
 @Value
 @ToString

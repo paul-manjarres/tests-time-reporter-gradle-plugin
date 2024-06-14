@@ -73,6 +73,11 @@ public abstract class GradleTest {
         return testCases;
     }
 
+    /**
+     * Returns the list of all tests suites related to this object.
+     * Collects all the test suites down in the hierarchy.
+     * @return Set of {@link GradleTestSuite}
+     */
     public Set<GradleTestSuite> getTestSuites() {
         if (this.children == null) {
             return Collections.emptySet();

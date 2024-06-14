@@ -10,7 +10,7 @@ plugins {
     id("io.github.paul-manjarres.test-time-reporter") version "0.6.0"
 }
 
-version = "0.7"
+version = "0.8"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 
