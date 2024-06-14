@@ -23,31 +23,32 @@ public class GradleTestTreeView {
 
         for (GradleTest run : testRun) {
             log.lifecycle(
-                    "+ {} - Tests: [{}] - Duration: [{}ms] - {}",
+                    "+ {} - {} Tests: [{}] - Duration: [{}ms]",
                     console.magenta(run.getName()),
+                    console.print(run.getResult().toString(), console.getColorBy(run.getResult())),
                     run.countTests(),
-                    String.format("%,6d", run.getDuration().toMillis()),
-                    console.print(run.getResult().toString(), console.getColorBy(run.getResult())));
+                    String.format("%,6d", run.getDuration().toMillis()));
 
             for (GradleTest executor : run.getChildren()) {
                 long executorTestCount = executor.countTests();
+                long suitesCount = executor.getChildren().size();
                 log.lifecycle(
-                        "|--- {} - {} - Duration: [{}ms] - Tests: [{}]",
+                        "|--- {} - {} - Duration: [{}ms] - Suites: [{}] - Tests: [{}]",
                         console.blue(executor.getName()),
                         console.print(executor.getResult().toString(), console.getColorBy(executor.getResult())),
                         String.format("%,6d", executor.getDuration().toMillis()),
+                        suitesCount,
                         executorTestCount);
 
                 for (GradleTest suite : executor.getChildren()) {
                     GradleTestSuite ts = (GradleTestSuite) suite;
                     log.lifecycle(
-                            "|    |--- Tests: [{}] {} [{}ms] - Suite: {} - InitTime: [{}ms]",
-                            ts.getNumberOfTests(),
+                            "|    |--- Tests: [{}] {} [{}ms] InitTime: [{}ms] - Suite: {}",
+                            String.format("%3d", ts.getNumberOfTests()),
                             console.print(ts.getResult().toString(), console.getColorBy(ts.getResult())),
                             String.format("%,6d", ts.getDuration().toMillis()),
-                            console.cyan(ts.getName()),
-                            String.format("%,d", ts.getInitTimeMillis()),
-                            executorTestCount);
+                            String.format("%3d", ts.getInitTimeMillis()),
+                            console.cyan(ts.getName()));
                 }
             }
             log.lifecycle("| ");
