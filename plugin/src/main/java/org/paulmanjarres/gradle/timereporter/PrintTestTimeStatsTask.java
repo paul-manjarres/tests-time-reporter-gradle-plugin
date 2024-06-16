@@ -143,7 +143,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         logNewLine();
 
         if (showGroupByResult) {
-            final TestResultsView view = new TestResultsView(cUtils, getLogger());
+            final TestResultsView view = new TestResultsView(cUtils, getLogger(), showFailed, showSkipped);
             view.printView(runSuites);
             logNewLine();
         }

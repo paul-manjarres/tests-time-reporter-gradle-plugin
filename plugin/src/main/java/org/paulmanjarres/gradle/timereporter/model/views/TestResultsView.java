@@ -15,6 +15,8 @@ import org.paulmanjarres.gradle.timereporter.utils.ConsoleUtils;
 public class TestResultsView {
     private ConsoleUtils console;
     private Logger log;
+    private boolean showFailed;
+    private boolean showSkipped;
 
     public void printView(List<GradleTestRun> runs) {
         log.lifecycle(console.yellow("Test results view"));
@@ -34,7 +36,7 @@ public class TestResultsView {
                         entry.getValue().size(),
                         allTestCases.size());
 
-                if (entry.getKey().equals(TestResult.ResultType.FAILURE)) {
+                if (showFailed && entry.getKey().equals(TestResult.ResultType.FAILURE)) {
                     ConsoleUtils.Color color = console.getColorBy(TestResult.ResultType.FAILURE);
                     for (GradleTestCase failTc : entry.getValue()) {
                         log.lifecycle(
@@ -42,7 +44,9 @@ public class TestResultsView {
                                 console.print(failTc.getClassName(), color),
                                 console.print(failTc.getName(), color));
                     }
-                } else if (entry.getKey().equals(TestResult.ResultType.SKIPPED)) {
+                }
+
+                if (showSkipped && entry.getKey().equals(TestResult.ResultType.SKIPPED)) {
                     ConsoleUtils.Color color = console.getColorBy(TestResult.ResultType.SKIPPED);
                     for (GradleTestCase failTc : entry.getValue()) {
                         log.lifecycle(
