@@ -2,9 +2,7 @@ package org.paulmanjarres.gradle.timereporter;
 
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestListener;
 import org.gradle.api.tasks.testing.TestResult;
@@ -18,11 +16,9 @@ import org.paulmanjarres.gradle.timereporter.model.*;
  */
 public class TimeReporterTestListener implements TestListener {
 
-    private final Set<GradleTestCase> stats;
     private final Map<String, GradleTest> suiteStats;
 
     public TimeReporterTestListener() {
-        stats = new HashSet<>();
         suiteStats = new HashMap<>();
     }
 
@@ -82,10 +78,10 @@ public class TimeReporterTestListener implements TestListener {
                 .duration(Duration.ofMillis(result.getEndTime() - result.getStartTime()))
                 .result(result.getResultType())
                 .build();
-        this.stats.add(testInstance);
 
-        final String parentName =
-                testDescriptor.getParent() != null ? testDescriptor.getParent().getName() : "root";
+        final String parentName = testDescriptor.getParent() != null
+                ? testDescriptor.getParent().getName()
+                : PluginConstants.ROOT_NODE_NAME;
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
         parent.addChildren(testInstance);
         testInstance.setParent(parent);
@@ -112,10 +108,6 @@ public class TimeReporterTestListener implements TestListener {
 
     public boolean isGradleTestRun(String name) {
         return name != null && name.toLowerCase().startsWith("gradle test run");
-    }
-
-    public Set<GradleTestCase> getStats() {
-        return new HashSet<>(stats);
     }
 
     public Map<String, GradleTest> getSuiteStats() {
