@@ -110,6 +110,5 @@ idea {
 }
 
 testTimeReporter {
-    enabled = true
     experimentalFeatures = false
 }
