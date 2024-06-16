@@ -29,12 +29,7 @@ public class TestResultsView {
                     allTestCases.stream().collect(Collectors.groupingBy(GradleTestCase::getResult));
 
             for (Map.Entry<TestResult.ResultType, List<GradleTestCase>> entry : groupsByResult.entrySet()) {
-                log.lifecycle(
-                        "- {} : {}% ({}/{})",
-                        console.print("" + entry.getKey(), console.getColorBy(entry.getKey())),
-                        String.format("%6.2f", entry.getValue().size() * 100 / (double) allTestCases.size()),
-                        entry.getValue().size(),
-                        allTestCases.size());
+                logResult(entry.getKey(), entry.getValue().size(), allTestCases.size());
 
                 if (showFailed && entry.getKey().equals(TestResult.ResultType.FAILURE)) {
                     ConsoleUtils.Color color = console.getColorBy(TestResult.ResultType.FAILURE);
@@ -57,5 +52,17 @@ public class TestResultsView {
                 }
             }
         }
+    }
+
+    private void logResult(TestResult.ResultType result, int tests, int total) {
+        ConsoleUtils.Color color = result == TestResult.ResultType.SUCCESS && tests < total
+                ? ConsoleUtils.Color.YELLOW
+                : ConsoleUtils.Color.CLEAR;
+        log.lifecycle(
+                "- {} : {} ({}/{})",
+                console.print("" + result, console.getColorBy(result)),
+                console.print(String.format("%6.2f%%", tests * 100 / (double) total), color),
+                tests,
+                total);
     }
 }

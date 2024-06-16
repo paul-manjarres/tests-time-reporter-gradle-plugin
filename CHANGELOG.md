@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10
+* Filter for the number of suites in the TreeView. 
+* Small changes in format. 
+
 ## v0.8
 * New TreeView: shows the tests structure with a high level view of the results. 
 * New flag to enable / disable the plugin. 

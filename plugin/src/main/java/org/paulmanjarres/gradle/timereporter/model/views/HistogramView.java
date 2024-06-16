@@ -27,7 +27,7 @@ public class HistogramView {
                 final Set<GradleTestCase> allTestCases = executor.getTestCases();
                 log.lifecycle("{}", console.magenta(run.getName()));
                 log.lifecycle(
-                        "{} - Total: [{}] - BinSize: [{}ms] - SlowThreshold: [{}ms] - TotalSuite Time: [{}ms]",
+                        "{} - Total: [{}] - BinSize: [{}ms] - SlowThreshold: [{}ms] - Total Time: [{}ms]",
                         console.magenta(executor.getName()),
                         allTestCases.size(),
                         binSize,
