@@ -22,18 +22,22 @@ In your build.gradle:
 
 ```kotlin
 plugins {
-    id("io.github.paul-manjarres.test-time-reporter") version "0.6.0"
+    id("io.github.paul-manjarres.test-time-reporter") version "0.9"
 }
 
 // These are the default values, can be omitted if they work for you
 testTimeReporter{
+    enabled = true                // Enabled / disables the plugin output. 
     longestTestsCount = 5         // The max amount of results to show in the slowest test section. 
     maxResultsForGroupByClass = 5 // The max amount of results to show in the group-by-class test section.
     binSizeInMillis = 100         // Size of each bin in the histogram
     slowThresholdInMillis = 200   // The threshold to consider a test as 'slow'
     showGroupByClass = true       // Enables/disables test grouped by class section
     showGroupByResult = true      // Enables/disables test grouped by result section
+    showSkipped = true            // Shows the skipped test names under the Results view.
+    showFailed = true             // Shows the failed test names under the Results view.
     showSlowestTests = true       // Enables/disables slowest test section
+    showTreeView = true           // Enables/disables slowest test section
     showHistogram = true          // Enables/disables histogram section
     coloredOutput = true          // If true, output will use colors.
 }

@@ -1,6 +1,8 @@
 # Changelog
 
 ## v0.8
+* New TreeView: shows the tests structure with a high level view of the results. 
+* New flag to enable / disable the plugin. 
 
 ## v0.5.0
 * Changes in formatting. 
