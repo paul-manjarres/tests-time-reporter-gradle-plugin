@@ -14,4 +14,8 @@ public class PluginExtensionDefaultValues {
     public static final boolean showHistogram = true;
     public static final boolean coloredOutput = true;
     public static final boolean experimentalFeatures = false;
+    public static final boolean ENABLED = true;
+    public static final boolean SHOW_SKIPPED = true;
+    public static final boolean SHOW_FAILED = true;
+    public static final boolean SHOW_TREE_VIEW = true;
 }

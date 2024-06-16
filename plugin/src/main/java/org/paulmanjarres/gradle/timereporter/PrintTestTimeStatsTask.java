@@ -40,11 +40,27 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     @Input
     @Optional
+    public abstract Property<Boolean> getPluginEnabled();
+
+    @Input
+    @Optional
     public abstract Property<Boolean> getShowGroupByResult();
 
     @Input
     @Optional
     public abstract Property<Boolean> getShowGroupByClass();
+
+    @Input
+    @Optional
+    public abstract Property<Boolean> getShowTreeView();
+
+    @Input
+    @Optional
+    public abstract Property<Boolean> getShowSkipped();
+
+    @Input
+    @Optional
+    public abstract Property<Boolean> getShowFailed();
 
     @Input
     @Optional
@@ -75,6 +91,12 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     public void process() {
 
+        boolean pluginEnabled = this.getPluginEnabled().get();
+        if (!pluginEnabled) {
+            getLogger().info("Plugin is disabled. Finishing PrintTestTimeStatsTask task.");
+            return;
+        }
+
         int binSize = this.getBinSize().get();
         int slowThreshold = this.getSlowThreshold().get();
         int longestTestCount = this.getLongestTestsCount().get();
@@ -82,6 +104,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         boolean showGroupByClass = this.getShowGroupByClass().get();
         boolean showSlowestTests = this.getShowSlowestTests().get();
         boolean showHistogram = this.getShowHistogram().get();
+        boolean showTreeView = this.getShowTreeView().get();
+        boolean showSkipped = this.getShowSkipped().get();
+        boolean showFailed = this.getShowFailed().get();
         boolean coloredOutput = this.getColoredOutput().get();
         boolean experimentalFeatures = this.getExperimentalFeatures().get();
         int maxResultsForGroupByClass = this.getMaxResultsForGroupByClass().get();
@@ -123,10 +148,11 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
             logNewLine();
         }
 
-        // TODO Flag
-        final GradleTestTreeView treeView = new GradleTestTreeView(cUtils, getLogger());
-        treeView.printTreeView(runSuites);
-        logNewLine();
+        if (showTreeView) {
+            final GradleTestTreeView treeView = new GradleTestTreeView(cUtils, getLogger());
+            treeView.printTreeView(runSuites);
+            logNewLine();
+        }
 
         if (showSlowestTests) {
             final SlowestTestsView slowestTestsView =

@@ -71,6 +71,10 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
             task.getExperimentalFeatures().set(extension.getExperimentalFeatures());
             task.getShowHistogram().set(extension.getShowHistogram());
             task.getColoredOutput().set(extension.getColoredOutput());
+            task.getPluginEnabled().set(extension.getEnabled());
+            task.getShowTreeView().set(extension.getShowTreeView());
+            task.getShowSkipped().set(extension.getShowSkipped());
+            task.getShowFailed().set(extension.getShowFailed());
         });
         project.getLogger().info("[{}] - Registered task {} ", EXTENSION_NAME, PRINT_TEST_TIME_STATS_TASK_NAME);
     }
@@ -86,5 +90,9 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         extension.getExperimentalFeatures().convention(PluginExtensionDefaultValues.experimentalFeatures);
         extension.getShowHistogram().convention(PluginExtensionDefaultValues.showHistogram);
         extension.getColoredOutput().convention(PluginExtensionDefaultValues.coloredOutput);
+        extension.getEnabled().convention(PluginExtensionDefaultValues.ENABLED);
+        extension.getShowTreeView().convention(PluginExtensionDefaultValues.SHOW_TREE_VIEW);
+        extension.getShowSkipped().convention(PluginExtensionDefaultValues.SHOW_SKIPPED);
+        extension.getShowFailed().convention(PluginExtensionDefaultValues.SHOW_FAILED);
     }
 }

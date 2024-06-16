@@ -44,4 +44,12 @@ public abstract class TestTimeReporterExtension {
     public abstract Property<Boolean> getColoredOutput();
 
     public abstract Property<Boolean> getExperimentalFeatures();
+
+    public abstract Property<Boolean> getShowTreeView();
+
+    public abstract Property<Boolean> getShowFailed();
+
+    public abstract Property<Boolean> getShowSkipped();
+
+    public abstract Property<Boolean> getEnabled();
 }
