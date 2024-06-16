@@ -1,6 +1,8 @@
 package org.paulmanjarres.gradle.timereporter.model.views;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.gradle.api.logging.Logger;
 import org.paulmanjarres.gradle.timereporter.model.GradleTest;
@@ -36,15 +38,20 @@ public class GradleTestTreeView {
                         suitesCount,
                         executorTestCount);
 
-                for (GradleTest suite : executor.getChildren()) {
-                    GradleTestSuite ts = (GradleTestSuite) suite;
+                List<GradleTestSuite> suites = executor.getChildren().stream()
+                        .map(GradleTestSuite.class::cast)
+                        .sorted(Comparator.comparing(GradleTestSuite::getDuration)
+                                .reversed())
+                        .collect(Collectors.toList());
+
+                for (GradleTestSuite suite : suites) {
                     log.lifecycle(
                             "|    |--- Tests: [{}] {} [{}ms] InitTime: [{}ms] - Suite: {}",
-                            String.format("%3d", ts.getNumberOfTests()),
-                            console.print(ts.getResult().toString(), console.getColorBy(ts.getResult())),
-                            String.format("%,6d", ts.getDuration().toMillis()),
-                            String.format("%3d", ts.getInitTimeMillis()),
-                            console.cyan(ts.getName()));
+                            String.format("%3d", suite.getNumberOfTests()),
+                            console.print(suite.getResult().toString(), console.getColorBy(suite.getResult())),
+                            String.format("%,6d", suite.getDuration().toMillis()),
+                            String.format("%3d", suite.getInitTimeMillis()),
+                            console.cyan(suite.getName()));
                 }
             }
             log.lifecycle("| ");
