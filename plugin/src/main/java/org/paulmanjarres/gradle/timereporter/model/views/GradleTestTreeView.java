@@ -15,6 +15,7 @@ public class GradleTestTreeView {
 
     private ConsoleUtils console;
     private Logger log;
+    private int suitesMaxResults;
 
     public void printTreeView(List<GradleTestRun> runs) {
         log.lifecycle(console.yellow("Test suites tree view"));
@@ -31,27 +32,33 @@ public class GradleTestTreeView {
                 long executorTestCount = executor.countTests();
                 long suitesCount = executor.getChildren().size();
                 log.lifecycle(
-                        "|--- {} - {} - Duration: [{}ms] - Suites: [{}] - Tests: [{}]",
+                        "|--- {} - {} - Duration: [{}ms] - Tests: [{}] - Suites: [{}] - MaxResults: [{}]",
                         console.blue(executor.getName()),
                         console.print(executor.getResult().toString(), console.getColorBy(executor.getResult())),
                         String.format("%,6d", executor.getDuration().toMillis()),
+                        executorTestCount,
                         suitesCount,
-                        executorTestCount);
+                        suitesMaxResults);
 
-                List<GradleTestSuite> suites = executor.getChildren().stream()
+                int hiddenSuites = executor.getChildren().size() - suitesMaxResults;
+                final List<GradleTestSuite> suites = executor.getChildren().stream()
                         .map(GradleTestSuite.class::cast)
                         .sorted(Comparator.comparing(GradleTestSuite::getDuration)
                                 .reversed())
+                        .limit(suitesMaxResults)
                         .collect(Collectors.toList());
 
                 for (GradleTestSuite suite : suites) {
                     log.lifecycle(
-                            "|    |--- Tests: [{}] {} [{}ms] InitTime: [{}ms] - Suite: {}",
+                            "|    |--- Tests: [{}] {} [{}ms] - Init: [{}ms] - Suite: {}",
                             String.format("%3d", suite.getNumberOfTests()),
                             console.print(suite.getResult().toString(), console.getColorBy(suite.getResult())),
                             String.format("%,6d", suite.getDuration().toMillis()),
                             String.format("%3d", suite.getInitTimeMillis()),
                             console.cyan(suite.getName()));
+                }
+                if (hiddenSuites > 0) {
+                    log.lifecycle("|    |--- ({}) suites hidden ...", hiddenSuites);
                 }
             }
             log.lifecycle("| ");

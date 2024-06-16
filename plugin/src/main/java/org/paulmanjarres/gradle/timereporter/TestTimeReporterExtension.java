@@ -33,6 +33,8 @@ public abstract class TestTimeReporterExtension {
      */
     public abstract Property<Integer> getSlowThresholdInMillis();
 
+    public abstract Property<Integer> getMaxResultsForTreeViewSuites();
+
     public abstract Property<Boolean> getShowGroupByResult();
 
     public abstract Property<Boolean> getShowGroupByClass();

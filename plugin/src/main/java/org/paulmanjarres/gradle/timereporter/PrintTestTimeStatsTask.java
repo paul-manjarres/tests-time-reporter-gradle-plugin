@@ -32,6 +32,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     @Input
     @Optional
+    public abstract Property<Integer> getMaxResultsForTreeViewSuites();
+
+    @Input
+    @Optional
     public abstract Property<Integer> getBinSize();
 
     @Input
@@ -110,6 +114,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         boolean coloredOutput = this.getColoredOutput().get();
         boolean experimentalFeatures = this.getExperimentalFeatures().get();
         int maxResultsForGroupByClass = this.getMaxResultsForGroupByClass().get();
+        int maxResultsForTreeViewSuites = this.getMaxResultsForTreeViewSuites().get();
 
         this.getLogger().debug("longestTestCount = {}", longestTestCount);
         this.getLogger().debug("maxResultsForGroupByClass = {}", maxResultsForGroupByClass);
@@ -149,7 +154,8 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         }
 
         if (showTreeView) {
-            final GradleTestTreeView treeView = new GradleTestTreeView(cUtils, getLogger());
+            final GradleTestTreeView treeView =
+                    new GradleTestTreeView(cUtils, getLogger(), maxResultsForTreeViewSuites);
             treeView.printTreeView(runSuites);
             logNewLine();
         }
