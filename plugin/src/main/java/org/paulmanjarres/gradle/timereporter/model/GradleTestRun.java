@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 public class GradleTestRun extends GradleTest {
 
     public static final GradleTestRun ROOT =
-            GradleTestRun.builder().name("root").build();
+            GradleTestRun.builder().name(PluginConstants.ROOT_NODE_NAME).build();
 
     @Override
     public String toString() {

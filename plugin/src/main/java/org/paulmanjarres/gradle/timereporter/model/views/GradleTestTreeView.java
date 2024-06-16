@@ -1,8 +1,6 @@
 package org.paulmanjarres.gradle.timereporter.model.views;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.gradle.api.logging.Logger;
 import org.paulmanjarres.gradle.timereporter.model.GradleTest;
@@ -16,12 +14,10 @@ public class GradleTestTreeView {
     private ConsoleUtils console;
     private Logger log;
 
-    public void printTreeView(Set<GradleTest> set) {
+    public void printTreeView(List<GradleTestRun> runs) {
         log.lifecycle(console.yellow("Test suites tree view"));
 
-        final List<GradleTestRun> testRun = getGradleTestRun(set);
-
-        for (GradleTest run : testRun) {
+        for (GradleTest run : runs) {
             log.lifecycle(
                     "+ {} - {} Tests: [{}] - Duration: [{}ms]",
                     console.magenta(run.getName()),
@@ -53,12 +49,5 @@ public class GradleTestTreeView {
             }
             log.lifecycle("| ");
         }
-    }
-
-    protected List<GradleTestRun> getGradleTestRun(Set<GradleTest> set) {
-        return set.stream()
-                .filter(s -> s.getParent() != null && s.getParent().getName().equals("root"))
-                .map(GradleTestRun.class::cast)
-                .collect(Collectors.toList());
     }
 }

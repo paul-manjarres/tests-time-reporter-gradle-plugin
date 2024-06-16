@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.testing.TestResult;
-import org.paulmanjarres.gradle.timereporter.model.GradleTest;
 import org.paulmanjarres.gradle.timereporter.model.GradleTestCase;
 import org.paulmanjarres.gradle.timereporter.model.GradleTestRun;
 import org.paulmanjarres.gradle.timereporter.utils.ConsoleUtils;
@@ -17,11 +16,10 @@ public class TestResultsView {
     private ConsoleUtils console;
     private Logger log;
 
-    public void printView(Set<GradleTest> set) {
+    public void printView(List<GradleTestRun> runs) {
         log.lifecycle(console.yellow("Test results view"));
-        final List<GradleTestRun> testRun = getGradleTestRun(set);
 
-        for (GradleTestRun run : testRun) {
+        for (GradleTestRun run : runs) {
             final Set<GradleTestCase> allTestCases = run.getTestCases();
             log.lifecycle(console.magenta("{}"), run.getSimplifiedName());
 
@@ -55,12 +53,5 @@ public class TestResultsView {
                 }
             }
         }
-    }
-
-    protected List<GradleTestRun> getGradleTestRun(Set<GradleTest> set) {
-        return set.stream()
-                .filter(s -> s.getParent() != null && s.getParent().getName().equals("root"))
-                .map(GradleTestRun.class::cast)
-                .collect(Collectors.toList());
     }
 }

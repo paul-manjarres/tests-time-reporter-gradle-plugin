@@ -19,12 +19,10 @@ public class SlowestTestsView {
     private long slowThreshold;
     private int maxResults;
 
-    public void printView(Set<GradleTest> set) {
+    public void printView(List<GradleTestRun> runs) {
         log.lifecycle(console.yellow("Slowest tests"));
 
-        final List<GradleTestRun> testRun = getGradleTestRun(set);
-
-        for (GradleTest run : testRun) {
+        for (GradleTest run : runs) {
             final Set<GradleTestCase> allTestCases = run.getTestCases();
             final List<GradleTestCase> slowTestList = getSlowestTestCases(allTestCases, slowThreshold);
 
@@ -39,13 +37,6 @@ public class SlowestTestsView {
             slowTestList.stream().limit(maxResults).forEach(r -> log.lifecycle(formatSlowestTest(r)));
             log.lifecycle(" ");
         }
-    }
-
-    protected List<GradleTestRun> getGradleTestRun(Set<GradleTest> set) {
-        return set.stream()
-                .filter(s -> s.getParent() != null && s.getParent().getName().equals("root"))
-                .map(GradleTestRun.class::cast)
-                .collect(Collectors.toList());
     }
 
     protected List<GradleTestCase> getSlowestTestCases(Set<GradleTestCase> set, long threshold) {
