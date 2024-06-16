@@ -25,6 +25,7 @@ public class HistogramView {
             for (GradleTest executor : run.getChildren()) {
 
                 final Set<GradleTestCase> allTestCases = executor.getTestCases();
+                log.lifecycle("{}", console.magenta(run.getName()));
                 log.lifecycle(
                         "{} - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms] - TotalSuite Time: [{}ms]",
                         console.magenta(executor.getName()),
@@ -47,8 +48,8 @@ public class HistogramView {
                             String.format("%4d", (i + 1) * binSize),
                             String.format("%4d", h.getValues()[i]),
                             String.format("%4d", h.getCount()),
-                            String.format("%5.2f%%", h.getPercentages()[i]),
-                            String.format("%,4d", h.getDuration()[i]),
+                            String.format("%6.2f%%", h.getPercentages()[i]),
+                            String.format("%,5d", h.getDuration()[i]),
                             String.format(
                                     "%5.2f",
                                     h.getDuration()[i]
@@ -61,8 +62,8 @@ public class HistogramView {
                         console.red(String.format("     > %4dms", h.getMaxValue())),
                         console.red(String.format("%4d", h.getSlowTestCount())),
                         console.red(String.format("%4d", h.getCount())),
-                        console.red(String.format("%5.2f%%", h.getSlowTestPercentage())),
-                        String.format("%,4d", h.getSlowTestDuration()),
+                        console.red(String.format("%6.2f%%", h.getSlowTestPercentage())),
+                        String.format("%,5d", h.getSlowTestDuration()),
                         String.format(
                                 "%5.2f",
                                 h.getSlowTestDuration()
@@ -70,15 +71,22 @@ public class HistogramView {
                                         / (double) executor.getDuration().toMillis()));
 
                 logNewLine();
-                log.lifecycle(
-                        "{} of the tests ({}) were considered slow. Approximately {} of total time.",
-                        console.yellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
-                        h.getSlowTestCount(),
-                        console.yellow(String.format(
-                                "%3.2f%%",
-                                h.getSlowTestDuration()
-                                        * 100
-                                        / (double) executor.getDuration().toMillis())));
+                if (h.getSlowTestCount() == 0) {
+                    log.lifecycle(
+                            "There are no tests considered slow. All of them are below the slow threshold of {}ms",
+                            slowThreshold);
+                } else {
+                    log.lifecycle(
+                            "{} of the tests ({}/{}) were considered slow. Approximately {} of total time.",
+                            console.yellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
+                            h.getSlowTestCount(),
+                            h.getCount(),
+                            console.yellow(String.format(
+                                    "%3.2f%%",
+                                    h.getSlowTestDuration()
+                                            * 100
+                                            / (double) executor.getDuration().toMillis())));
+                }
                 logNewLine();
             }
         }
