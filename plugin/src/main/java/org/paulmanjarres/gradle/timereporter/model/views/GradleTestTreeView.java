@@ -54,7 +54,7 @@ public class GradleTestTreeView {
                             String.format("%3d", suite.getNumberOfTests()),
                             console.print(suite.getResult().toString(), console.getColorBy(suite.getResult())),
                             String.format("%,6d", suite.getDuration().toMillis()),
-                            String.format("%3d", suite.getInitTimeMillis()),
+                            String.format("%,5d", suite.getInitTimeMillis()),
                             console.cyan(suite.getName()));
                 }
                 if (hiddenSuites > 0) {

@@ -27,7 +27,7 @@ public class HistogramView {
                 final Set<GradleTestCase> allTestCases = executor.getTestCases();
                 log.lifecycle("{}", console.magenta(run.getName()));
                 log.lifecycle(
-                        "{} - Total: [{}] - BinSize: [{}ms] - Slow Threshold: [{}ms] - TotalSuite Time: [{}ms]",
+                        "{} - Total: [{}] - BinSize: [{}ms] - SlowThreshold: [{}ms] - TotalSuite Time: [{}ms]",
                         console.magenta(executor.getName()),
                         allTestCases.size(),
                         binSize,
@@ -40,35 +40,32 @@ public class HistogramView {
 
                 final Histogram h = Histogram.from(allTestCases, conf);
                 log.lifecycle("================================================");
+                log.lifecycle("       Bin          Tests      %        Time      %Time");
 
                 for (int i = 0; i < h.getBuckets(); i++) {
+                    double durationPercentage = h.getDuration()[i]
+                            * 100
+                            / (double) executor.getDuration().toMillis();
                     log.lifecycle(
-                            " [{} - {}ms] : ({}/{}) - [{}]  - {}ms - {}%",
+                            " [{} - {}ms] : {} - [{}]  - {}ms - {}%",
                             String.format("%4d", i * binSize),
                             String.format("%4d", (i + 1) * binSize),
                             String.format("%4d", h.getValues()[i]),
-                            String.format("%4d", h.getCount()),
                             String.format("%6.2f%%", h.getPercentages()[i]),
                             String.format("%,5d", h.getDuration()[i]),
-                            String.format(
-                                    "%5.2f",
-                                    h.getDuration()[i]
-                                            * 100
-                                            / (double) executor.getDuration().toMillis()));
+                            String.format("%5.2f", durationPercentage));
                 }
 
+                double stDurationPercentage = h.getSlowTestDuration()
+                        * 100
+                        / (double) executor.getDuration().toMillis();
                 log.lifecycle(
-                        " [{}] : ({}/{}) - [{}]  - {}ms - {}%",
+                        " [{}] : {} - [{}]  - {}ms - {}%",
                         console.red(String.format("     > %4dms", h.getMaxValue())),
                         console.red(String.format("%4d", h.getSlowTestCount())),
-                        console.red(String.format("%4d", h.getCount())),
                         console.red(String.format("%6.2f%%", h.getSlowTestPercentage())),
                         String.format("%,5d", h.getSlowTestDuration()),
-                        String.format(
-                                "%5.2f",
-                                h.getSlowTestDuration()
-                                        * 100
-                                        / (double) executor.getDuration().toMillis()));
+                        String.format("%5.2f", stDurationPercentage));
 
                 logNewLine();
                 if (h.getSlowTestCount() == 0) {
