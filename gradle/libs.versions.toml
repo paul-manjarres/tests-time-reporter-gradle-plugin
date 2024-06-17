@@ -2,7 +2,7 @@
 junit-jupiter = "5.10.2"
 lombok = "1.18.32"
 assertJ= "3.26.0"
-mockito= "4.+"
+mockito= "4.11.0"
 
 [libraries]
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
