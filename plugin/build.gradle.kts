@@ -7,7 +7,7 @@ plugins {
     jacoco
     id("com.gradle.plugin-publish") version "1.2.1"
     id("com.diffplug.spotless") version "6.25.0"
-    id("io.github.paul-manjarres.test-time-reporter") version "0.9"
+    id("io.github.paul-manjarres.test-time-reporter") version "0.10"
 }
 
 version = "0.10"
