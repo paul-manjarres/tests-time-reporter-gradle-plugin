@@ -27,7 +27,10 @@ public class GradleTestSuite extends GradleTest {
 
     @Override
     public Set<GradleTestCase> getTestCases() {
-        return this.getChildren().stream().map(GradleTestCase.class::cast).collect(Collectors.toSet());
+        return this.getChildren().stream()
+                .filter(t -> t instanceof GradleTestCase)
+                .map(GradleTestCase.class::cast)
+                .collect(Collectors.toSet());
     }
 
     @Override

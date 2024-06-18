@@ -49,6 +49,7 @@ public class TimeReporterTestListener implements TestListener {
         sStats.setDuration(duration);
         sStats.setEndTime(result.getEndTime());
         sStats.setResult(result.getResultType());
+        log.info("AfterSuite Name:{} - Result: {} - Class: {}", suite.getName(), result, suite.getClassName());
 
         if (sStats instanceof GradleTestSuite) {
             final GradleTestSuite gtSuite = (GradleTestSuite) sStats;
@@ -74,10 +75,11 @@ public class TimeReporterTestListener implements TestListener {
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
         log.info(
-                "AfterTest Name:{} - Result: {} - Parent:{}",
+                "AfterTest Name:{} - Result: {} - Parent:{} - Class:{}",
                 testDescriptor.getName(),
                 result,
-                testDescriptor.getParent());
+                testDescriptor.getParent(),
+                testDescriptor.getParent().getClassName());
         final GradleTestCase testInstance = GradleTestCase.builder()
                 .className(testDescriptor.getClassName())
                 .name(testDescriptor.getName())
