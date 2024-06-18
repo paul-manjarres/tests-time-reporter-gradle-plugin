@@ -73,7 +73,11 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
-        log.info("AfterTest Name:{} - Result: {} - Parent:{}", testDescriptor.getName(), result, testDescriptor.getParent());
+        log.info(
+                "AfterTest Name:{} - Result: {} - Parent:{}",
+                testDescriptor.getName(),
+                result,
+                testDescriptor.getParent());
         final GradleTestCase testInstance = GradleTestCase.builder()
                 .className(testDescriptor.getClassName())
                 .name(testDescriptor.getName())
