@@ -135,6 +135,11 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         this.getLogger().lifecycle(cUtils.cyan("========== Tests Time Execution Statistics (BETA) =========="));
         logNewLine();
 
+        if (sStats == null || sStats.isEmpty()) {
+            getLogger().lifecycle("WARN: TestListener data is empty, cannot continue. ");
+            return;
+        }
+
         final List<GradleTestRun> runSuites = getGradleTestRun(sStats);
 
         runSuites.forEach(s -> {

@@ -3,6 +3,7 @@ package org.paulmanjarres.gradle.timereporter;
 import static org.paulmanjarres.gradle.timereporter.model.PluginConstants.EXTENSION_NAME;
 import static org.paulmanjarres.gradle.timereporter.model.PluginConstants.PRINT_TEST_TIME_STATS_TASK_NAME;
 
+import java.util.HashMap;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskCollection;
@@ -27,7 +28,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         final TestTimeReporterExtension extension = registerExtension(project);
         setExtensionDefaultValues(extension);
 
-        final TimeReporterTestListener listener = new TimeReporterTestListener();
+        final TimeReporterTestListener listener = new TimeReporterTestListener(new HashMap<>(), project.getLogger());
         registerTask(project, listener, extension);
 
         final TaskCollection<Test> testTasks = project.getTasks().withType(Test.class);

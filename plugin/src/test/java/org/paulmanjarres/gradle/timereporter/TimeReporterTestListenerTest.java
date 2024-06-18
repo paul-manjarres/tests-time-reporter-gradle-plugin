@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.HashMap;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestResult;
 import org.junit.jupiter.api.Test;
@@ -16,7 +18,7 @@ class TimeReporterTestListenerTest {
     void whenNewSuiteExecuted_then_isRegisteredByListener() {
 
         // GIVEN
-        TimeReporterTestListener tl = new TimeReporterTestListener();
+        TimeReporterTestListener tl = new TimeReporterTestListener(new HashMap<>(), mock(Logger.class));
         TestDescriptor td = mock(TestDescriptor.class);
         TestResult result = mock(TestResult.class);
 

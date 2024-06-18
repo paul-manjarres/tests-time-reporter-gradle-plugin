@@ -3,6 +3,8 @@ package org.paulmanjarres.gradle.timereporter;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AllArgsConstructor;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestListener;
 import org.gradle.api.tasks.testing.TestResult;
@@ -14,30 +16,22 @@ import org.paulmanjarres.gradle.timereporter.model.*;
  * @author <a href="mailto:paul.manjarres@gmail.com">Jean Paul Manjarres Correal</a>
  * @since 0.1.0
  */
+@AllArgsConstructor
 public class TimeReporterTestListener implements TestListener {
 
     private final Map<String, GradleTest> suiteStats;
 
-    public TimeReporterTestListener() {
-        suiteStats = new HashMap<>();
-    }
+    private Logger log;
 
     @Override
     public void beforeSuite(TestDescriptor suite) {
+
         final String parentName =
                 suite.getParent() != null ? suite.getParent().getName() : PluginConstants.ROOT_NODE_NAME;
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
         final String suiteName = suite.getName();
 
-        GradleTest gtSuite = null;
-        if (isGradleTestExecutor(suiteName)) {
-            gtSuite = createGradleTestExecutor(suite);
-        } else if (isGradleTestRun(suiteName)) {
-            gtSuite = createGradleTestRun(suite);
-        } else {
-            gtSuite = createGradleTestSuite(suite);
-        }
-
+        final GradleTest gtSuite = createGradleTest(suite);
         gtSuite.setParent(parent);
         gtSuite.setStartTime(System.currentTimeMillis());
 
@@ -87,6 +81,16 @@ public class TimeReporterTestListener implements TestListener {
         testInstance.setParent(parent);
     }
 
+    protected GradleTest createGradleTest(TestDescriptor suite) {
+        if (isGradleTestExecutor(suite.getName())) {
+            return createGradleTestExecutor(suite);
+        } else if (isGradleTestRun(suite.getName())) {
+            return createGradleTestRun(suite);
+        } else {
+            return createGradleTestSuite(suite);
+        }
+    }
+
     public GradleTestSuite createGradleTestSuite(TestDescriptor suite) {
         return GradleTestSuite.builder()
                 .name(suite.getName())
@@ -94,19 +98,19 @@ public class TimeReporterTestListener implements TestListener {
                 .build();
     }
 
-    public GradleTestRun createGradleTestRun(TestDescriptor suite) {
+    protected GradleTestRun createGradleTestRun(TestDescriptor suite) {
         return GradleTestRun.builder().name(suite.getName()).build();
     }
 
-    public GradleTestExecutor createGradleTestExecutor(TestDescriptor suite) {
+    protected GradleTestExecutor createGradleTestExecutor(TestDescriptor suite) {
         return GradleTestExecutor.builder().name(suite.getName()).build();
     }
 
-    public boolean isGradleTestExecutor(String name) {
+    protected boolean isGradleTestExecutor(String name) {
         return name != null && name.toLowerCase().startsWith("gradle test executor");
     }
 
-    public boolean isGradleTestRun(String name) {
+    protected boolean isGradleTestRun(String name) {
         return name != null && name.toLowerCase().startsWith("gradle test run");
     }
 
