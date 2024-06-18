@@ -25,7 +25,7 @@ public class GradleTestTreeView {
                     "+ {} - {} Tests: [{}] - Duration: [{}ms]",
                     console.magenta(run.getName()),
                     console.print(run.getResult().toString(), console.getColorBy(run.getResult())),
-                    run.countTests(),
+                    String.format("%,d", run.countTests()),
                     String.format("%,6d", run.getDuration().toMillis()));
 
             for (GradleTest executor : run.getChildren()) {
@@ -36,7 +36,7 @@ public class GradleTestTreeView {
                         console.blue(executor.getName()),
                         console.print(executor.getResult().toString(), console.getColorBy(executor.getResult())),
                         String.format("%,6d", executor.getDuration().toMillis()),
-                        executorTestCount,
+                        String.format("%,d", executorTestCount),
                         suitesCount,
                         suitesMaxResults);
 
@@ -50,8 +50,8 @@ public class GradleTestTreeView {
 
                 for (GradleTestSuite suite : suites) {
                     log.lifecycle(
-                            "|    |--- Tests: [{}] {} [{}ms] - Init: [{}ms] - Suite: {}",
-                            String.format("%3d", suite.getNumberOfTests()),
+                            "|    |--- Tests: [{}] - {} - [{}ms] - Init: [{}ms] - {}",
+                            String.format("%5d", suite.getNumberOfTests()),
                             console.print(suite.getResult().toString(), console.getColorBy(suite.getResult())),
                             String.format("%,6d", suite.getDuration().toMillis()),
                             String.format("%,5d", suite.getInitTimeMillis()),

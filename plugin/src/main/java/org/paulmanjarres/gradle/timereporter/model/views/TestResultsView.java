@@ -59,10 +59,10 @@ public class TestResultsView {
                 ? ConsoleUtils.Color.YELLOW
                 : ConsoleUtils.Color.CLEAR;
         log.lifecycle(
-                "- {} : {} ({}/{})",
+                "- {} : {} ({} / {})",
                 console.print("" + result, console.getColorBy(result)),
                 console.print(String.format("%6.2f%%", tests * 100 / (double) total), color),
-                tests,
-                total);
+                String.format("%,d", tests),
+                String.format("%,d", total));
     }
 }

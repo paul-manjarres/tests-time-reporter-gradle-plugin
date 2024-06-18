@@ -29,7 +29,7 @@ public class HistogramView {
                 log.lifecycle(
                         "{} - Total: [{}] - BinSize: [{}ms] - SlowThreshold: [{}ms] - Total Time: [{}ms]",
                         console.magenta(executor.getName()),
-                        allTestCases.size(),
+                        String.format("%,d", allTestCases.size()),
                         binSize,
                         slowThreshold,
                         String.format("%,6d", executor.getDuration().toMillis()));
@@ -40,7 +40,7 @@ public class HistogramView {
 
                 final Histogram h = Histogram.from(allTestCases, conf);
                 log.lifecycle("================================================");
-                log.lifecycle("       Bin          Tests      %        Time      %Time");
+                log.lifecycle("       Bin          Tests       %          Time      %Time");
 
                 for (int i = 0; i < h.getBuckets(); i++) {
                     double durationPercentage = h.getDuration()[i]
@@ -50,21 +50,21 @@ public class HistogramView {
                             " [{} - {}ms] : {} - [{}]  - {}ms - {}%",
                             String.format("%4d", i * binSize),
                             String.format("%4d", (i + 1) * binSize),
-                            String.format("%4d", h.getValues()[i]),
+                            String.format("%,6d", h.getValues()[i]),
                             String.format("%6.2f%%", h.getPercentages()[i]),
-                            String.format("%,5d", h.getDuration()[i]),
+                            String.format("%,6d", h.getDuration()[i]),
                             String.format("%5.2f", durationPercentage));
                 }
 
-                double stDurationPercentage = h.getSlowTestDuration()
+                final double stDurationPercentage = h.getSlowTestDuration()
                         * 100
                         / (double) executor.getDuration().toMillis();
                 log.lifecycle(
                         " [{}] : {} - [{}]  - {}ms - {}%",
                         console.red(String.format("     > %4dms", h.getMaxValue())),
-                        console.red(String.format("%4d", h.getSlowTestCount())),
+                        console.red(String.format("%,6d", h.getSlowTestCount())),
                         console.red(String.format("%6.2f%%", h.getSlowTestPercentage())),
-                        String.format("%,5d", h.getSlowTestDuration()),
+                        String.format("%,6d", h.getSlowTestDuration()),
                         String.format("%5.2f", stDurationPercentage));
 
                 logNewLine();
@@ -77,7 +77,7 @@ public class HistogramView {
                             "{} of the tests ({}/{}) were considered slow. Approximately {} of total time.",
                             console.yellow(String.format("%3.2f%%", h.getSlowTestPercentage())),
                             h.getSlowTestCount(),
-                            h.getCount(),
+                            String.format("%,d", h.getCount()),
                             console.yellow(String.format(
                                     "%3.2f%%",
                                     h.getSlowTestDuration()

@@ -82,6 +82,8 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     @Optional
     public abstract Property<Boolean> getShowHistogram();
 
+    private static final String SEPARATOR = "================================================";
+
     @TaskAction
     public void print() {
         try {
@@ -141,10 +143,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                     .lifecycle(
                             "{} - Test Count: [{}] - Test time: [{}ms]",
                             cUtils.magenta(name),
-                            s.countTests(),
-                            String.format("%,6d", s.getDuration().toMillis()));
+                            String.format("%,d", s.countTests()),
+                            String.format("%,d", s.getDuration().toMillis()));
         });
-
         logNewLine();
 
         if (showGroupByResult) {
@@ -175,9 +176,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
         if (experimentalFeatures) {
 
-            this.getLogger().lifecycle("================================================");
+            this.getLogger().lifecycle(SEPARATOR);
             this.getLogger().lifecycle("====== EXPERIMENTAL =====");
-            this.getLogger().lifecycle("================================================");
+            this.getLogger().lifecycle(SEPARATOR);
 
             this.getLogger().lifecycle("Suites values: ");
             sStats.values().forEach(t -> this.getLogger().lifecycle(" - " + t.toString()));
@@ -194,11 +195,11 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
             logNewLine();
 
-            this.getLogger().lifecycle("================================================");
+            this.getLogger().lifecycle(SEPARATOR);
         }
 
         this.getLogger().lifecycle(cUtils.cyan("End of PrintTestTimeStatsTask"));
-        this.getLogger().lifecycle(cUtils.cyan("================================================"));
+        this.getLogger().lifecycle(cUtils.cyan(SEPARATOR));
     }
 
     public void logNewLine() {

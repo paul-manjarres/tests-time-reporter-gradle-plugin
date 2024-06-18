@@ -29,8 +29,8 @@ public class SlowestTestsView {
             log.lifecycle(
                     "{} SlowTests: [{} out of {}] - Threshold: [{}ms] - Max Results: [{}]",
                     console.magenta(run.getName()),
-                    slowTestList.size(),
-                    allTestCases.size(),
+                    String.format("%,d", slowTestList.size()),
+                    String.format("%,d", allTestCases.size()),
                     slowThreshold,
                     maxResults);
 
@@ -48,10 +48,10 @@ public class SlowestTestsView {
 
     protected String formatSlowestTest(GradleTestCase r) {
         return String.format(
-                "[%,6d ms] - %s - %s.%s ",
+                "[%,6dms] - %s - %s.%s ",
                 r.getDuration().toMillis(),
                 console.print(r.getResult().toString(), console.getColorBy(r.getResult())),
-                r.getClassName(),
-                r.getName());
+                console.cyan(r.getClassName()),
+                console.cyan(r.getName()));
     }
 }
