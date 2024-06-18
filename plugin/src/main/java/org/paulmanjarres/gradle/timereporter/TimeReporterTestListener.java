@@ -29,11 +29,12 @@ public class TimeReporterTestListener implements TestListener {
         final String parentName =
                 suite.getParent() != null ? suite.getParent().getName() : PluginConstants.ROOT_NODE_NAME;
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
+        log.info("beforeSuite Name:{} - Parent: {}", suite.getName(), parent);
         final String suiteName = suite.getName();
 
         final GradleTest gtSuite = createGradleTest(suite);
         gtSuite.setParent(parent);
-        gtSuite.setStartTime(System.currentTimeMillis());
+        gtSuite.setStartTime(System.currentTimeMillis()); // TODO esta medida es confiable?
 
         this.suiteStats.put(suiteName, gtSuite);
         if (suiteStats.containsKey(parentName) && !(parent instanceof GradleTestCase)) {
@@ -57,6 +58,12 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void beforeTest(TestDescriptor testDescriptor) {
+        log.info("beforeTest Test:{} - Parent: {}", testDescriptor.getName(), testDescriptor.getParent());
+        if (testDescriptor.getParent() == null) {
+            log.lifecycle("WARN beforeTest() -> Parent for Test: {} is NULL", testDescriptor.getName());
+            return;
+        }
+
         final GradleTestSuite suite =
                 (GradleTestSuite) this.suiteStats.get(testDescriptor.getParent().getName());
         if (suite.getInitTimeMillis() == 0) {
@@ -66,6 +73,7 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
+        log.info("AfterTest Name:{} - Result: {} - Parent:{}", testDescriptor.getName(), result, testDescriptor.getParent());
         final GradleTestCase testInstance = GradleTestCase.builder()
                 .className(testDescriptor.getClassName())
                 .name(testDescriptor.getName())
@@ -73,10 +81,18 @@ public class TimeReporterTestListener implements TestListener {
                 .result(result.getResultType())
                 .build();
 
-        final String parentName = testDescriptor.getParent() != null
-                ? testDescriptor.getParent().getName()
-                : PluginConstants.ROOT_NODE_NAME;
+        if (testDescriptor.getParent() == null) {
+            log.lifecycle("WARN Parent for Test: {} is NULL", testDescriptor.getName());
+            return;
+        }
+
+        final String parentName = testDescriptor.getParent().getName();
         final GradleTest parent = suiteStats.getOrDefault(parentName, GradleTestRun.ROOT);
+        if (!(parent instanceof GradleTestSuite)) {
+            log.lifecycle(
+                    "WARN Parent for Test: {} is not of type GradleSuite, type:", testDescriptor.getName(), parent);
+            return;
+        }
         parent.addChildren(testInstance);
         testInstance.setParent(parent);
     }
