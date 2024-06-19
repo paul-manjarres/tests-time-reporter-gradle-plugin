@@ -31,14 +31,19 @@ public class GradleTestTreeView {
             for (GradleTest executor : run.getChildren()) {
                 long executorTestCount = executor.countTests();
                 long suitesCount = executor.getChildren().size();
+                long totalInitTime = executor.getTestSuites().stream()
+                        .mapToLong(GradleTestSuite::getInitTimeMillis)
+                        .sum();
+
                 log.lifecycle(
-                        "|--- {} - {} - Duration: [{}ms] - Tests: [{}] - Suites: [{}] - MaxResults: [{}]",
+                        "|--- {} - {} - Duration: [{}ms] - Tests: [{}] - Suites: [{}] - MaxResults: [{}] - TotalInitTime: [{}ms]",
                         console.blue(executor.getName()),
                         console.print(executor.getResult().toString(), console.getColorBy(executor.getResult())),
                         String.format("%,6d", executor.getDuration().toMillis()),
                         String.format("%,d", executorTestCount),
                         suitesCount,
-                        suitesMaxResults);
+                        suitesMaxResults,
+                        totalInitTime);
 
                 int hiddenSuites = executor.getChildren().size() - suitesMaxResults;
                 final List<GradleTestSuite> suites = executor.getChildren().stream()

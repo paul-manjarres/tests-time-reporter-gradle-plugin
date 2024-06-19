@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.12
+* Fixed bug in getting test suites. 
+* Added screenshots and README information. 
+
 ## v0.10
 * Filter for the number of suites in the TreeView. 
 * Small changes in format. 
