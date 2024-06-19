@@ -84,6 +84,9 @@ public abstract class GradleTest {
         }
         final Set<GradleTestSuite> testSuites = new HashSet<>();
         for (GradleTest t : this.children) {
+            if (t instanceof GradleTestSuite) {
+                testSuites.add((GradleTestSuite) t);
+            }
             testSuites.addAll(t.getTestSuites());
         }
         return testSuites;

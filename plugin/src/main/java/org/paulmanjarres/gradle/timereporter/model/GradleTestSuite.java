@@ -1,9 +1,9 @@
 package org.paulmanjarres.gradle.timereporter.model;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 
 @Data
@@ -22,32 +22,32 @@ public class GradleTestSuite extends GradleTest {
 
     @Override
     public int countTests() {
-        return this.numberOfTests;
+        return this.numberOfTests + super.countTests();
     }
 
     @Override
     public Set<GradleTestCase> getTestCases() {
-        return this.getChildren().stream()
-                .filter(t -> t instanceof GradleTestCase)
+        final Set<GradleTestCase> directTestCases = this.getChildren().stream()
+                .filter(GradleTestCase.class::isInstance)
                 .map(GradleTestCase.class::cast)
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<GradleTestSuite> getTestSuites() {
-        return Collections.emptySet();
+        directTestCases.addAll(super.getTestCases());
+        return directTestCases;
     }
 
     @Override
     public String toString() {
         final String duration =
                 this.getDuration() == null ? "null" : this.getDuration().toMillis() + "ms";
+        final String parentName =
+                this.getParent() == null ? "null" : this.getParent().getName();
+        final int childrenSize =
+                (this.getChildren() == null ? 0 : this.getChildren().size());
         return "GradleTestSuite(" + "name='" + this.getName()
                 + "', duration=" + duration
                 + ", initTime=" + initTimeMillis
                 + ", numberOfTests=" + this.getNumberOfTests() + ", childrenSize="
-                + (this.getChildren() == null ? 0 : this.getChildren().size())
-                + ", className='" + this.getClassName()
-                + "')";
+                + childrenSize
+                + ", parentName=" + parentName + ", className='" + this.getClassName() + "')";
     }
 }

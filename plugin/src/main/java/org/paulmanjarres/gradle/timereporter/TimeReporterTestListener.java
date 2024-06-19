@@ -20,7 +20,6 @@ import org.paulmanjarres.gradle.timereporter.model.*;
 public class TimeReporterTestListener implements TestListener {
 
     private final Map<String, GradleTest> suiteStats;
-
     private Logger log;
 
     @Override
