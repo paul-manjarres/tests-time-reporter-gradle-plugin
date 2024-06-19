@@ -7,10 +7,10 @@ plugins {
     jacoco
     id("com.gradle.plugin-publish") version "1.2.1"
     id("com.diffplug.spotless") version "6.25.0"
-    id("io.github.paul-manjarres.test-time-reporter") version "0.10"
+    id("io.github.paul-manjarres.test-time-reporter") version "0.11"
 }
 
-version = "0.12-SNAPSHOT"
+version = "0.12"
 group = "io.github.paul-manjarres"
 description = "A gradle plugin to display test execution statistics"
 
