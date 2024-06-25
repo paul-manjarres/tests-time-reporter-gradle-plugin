@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Writer;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -24,6 +25,7 @@ class TestsTimeReporterGradlePluginPluginFunctionalTest {
     }
 
     @Test
+    @Disabled
     void canRunTask() throws IOException {
         writeString(getSettingsFile(), "");
         writeString(

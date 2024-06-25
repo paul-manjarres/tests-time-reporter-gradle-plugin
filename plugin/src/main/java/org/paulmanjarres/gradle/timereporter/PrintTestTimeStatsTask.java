@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
@@ -41,6 +42,10 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
     @Input
     @Optional
     public abstract Property<Integer> getSlowThreshold();
+
+    @Input
+    @Optional
+    public abstract Property<Integer> getMinTestsForExecution();
 
     @Input
     @Optional
@@ -117,6 +122,7 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         boolean experimentalFeatures = this.getExperimentalFeatures().get();
         int maxResultsForGroupByClass = this.getMaxResultsForGroupByClass().get();
         int maxResultsForTreeViewSuites = this.getMaxResultsForTreeViewSuites().get();
+        int minTestsForExecution = this.getMinTestsForExecution().get();
 
         this.getLogger().debug("longestTestCount = {}", longestTestCount);
         this.getLogger().debug("maxResultsForGroupByClass = {}", maxResultsForGroupByClass);
@@ -132,14 +138,20 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
         final Map<String, GradleTest> sStats = this.getTestListener().get().getSuiteStats();
         cUtils.setColorEnabled(coloredOutput);
 
-        this.getLogger().lifecycle(cUtils.cyan("========== Tests Time Execution Statistics (BETA) =========="));
-        logNewLine();
-
-        if (sStats == null || sStats.isEmpty()) {
-            getLogger().lifecycle("WARN: TestListener data is empty, cannot continue. ");
+        int testCount = this.getTestListener().get().getTestCount();
+        log().info("Test count: {}", testCount);
+        if (testCount < minTestsForExecution) {
+            log().info("Number of test is {}, lower than threshold ({}) to proceed.", testCount, minTestsForExecution);
             return;
         }
 
+        log().lifecycle(cUtils.cyan("========== Tests Time Execution Statistics (BETA) =========="));
+        logNewLine();
+
+        if (sStats == null || sStats.isEmpty()) {
+            log().lifecycle("TestListener data is empty, finishing execution.");
+            return;
+        }
         final List<GradleTestRun> runSuites = getGradleTestRun(sStats);
 
         runSuites.forEach(s -> {
@@ -218,5 +230,9 @@ public abstract class PrintTestTimeStatsTask extends DefaultTask {
                 .stream()
                 .map(GradleTestRun.class::cast)
                 .collect(Collectors.toList());
+    }
+
+    private Logger log() {
+        return this.getLogger();
     }
 }

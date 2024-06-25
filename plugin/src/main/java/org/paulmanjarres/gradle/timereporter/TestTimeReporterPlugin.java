@@ -77,6 +77,7 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
             task.getShowSkipped().set(extension.getShowSkipped());
             task.getShowFailed().set(extension.getShowFailed());
             task.getMaxResultsForTreeViewSuites().set(extension.getMaxResultsForTreeViewSuites());
+            task.getMinTestsForExecution().set(extension.getMinTestsForExecution());
         });
         project.getLogger().info("[{}] - Registered task {} ", EXTENSION_NAME, PRINT_TEST_TIME_STATS_TASK_NAME);
     }
@@ -99,5 +100,6 @@ public class TestTimeReporterPlugin implements Plugin<Project> {
         extension
                 .getMaxResultsForTreeViewSuites()
                 .convention(PluginExtensionDefaultValues.MAX_RESULTS_FOR_TREE_VIEW_SUITES);
+        extension.getMinTestsForExecution().convention(PluginExtensionDefaultValues.MIN_TESTS_FOR_EXECUTION);
     }
 }

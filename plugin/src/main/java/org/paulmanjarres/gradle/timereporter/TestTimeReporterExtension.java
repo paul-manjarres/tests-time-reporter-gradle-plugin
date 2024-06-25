@@ -35,6 +35,8 @@ public abstract class TestTimeReporterExtension {
 
     public abstract Property<Integer> getMaxResultsForTreeViewSuites();
 
+    public abstract Property<Integer> getMinTestsForExecution();
+
     public abstract Property<Boolean> getShowGroupByResult();
 
     public abstract Property<Boolean> getShowGroupByClass();

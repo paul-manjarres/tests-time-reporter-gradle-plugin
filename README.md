@@ -42,6 +42,7 @@ testTimeReporter{
     showTreeView = true              // Enables/disables slowest test section
     showHistogram = true             // Enables/disables histogram section
     coloredOutput = true             // If true, output will use colors.
+    minTestsForExecution = 3         // The min number of tests that should be to execute this plugin. 
 }
 ```
 

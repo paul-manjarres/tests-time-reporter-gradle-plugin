@@ -3,7 +3,9 @@ package org.paulmanjarres.gradle.timereporter;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.testing.TestDescriptor;
 import org.gradle.api.tasks.testing.TestListener;
@@ -16,11 +18,15 @@ import org.paulmanjarres.gradle.timereporter.model.*;
  * @author <a href="mailto:paul.manjarres@gmail.com">Jean Paul Manjarres Correal</a>
  * @since 0.1.0
  */
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TimeReporterTestListener implements TestListener {
 
     private final Map<String, GradleTest> suiteStats;
-    private Logger log;
+
+    @Getter
+    private int testCount = 0;
+
+    @NonNull private Logger log;
 
     @Override
     public void beforeSuite(TestDescriptor suite) {
@@ -73,6 +79,7 @@ public class TimeReporterTestListener implements TestListener {
 
     @Override
     public void afterTest(TestDescriptor testDescriptor, TestResult result) {
+        testCount++;
         log.info(
                 "AfterTest Name:{} - Result: {} - Parent:{} - Class:{}",
                 testDescriptor.getName(),

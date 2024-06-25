@@ -1,6 +1,6 @@
 package org.paulmanjarres.gradle.timereporter;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;

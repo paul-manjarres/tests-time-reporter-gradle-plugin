@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.13
+* New config option to avoid executing the plugin if there are less than X tests.
+
 ## v0.12
 * Fixed bug in getting test suites. 
 * Added screenshots and README information. 
