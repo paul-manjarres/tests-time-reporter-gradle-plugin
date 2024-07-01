@@ -1,6 +1,6 @@
 [versions]
 junit-jupiter = "5.10.2"
-lombok = "1.18.32"
+lombok = "1.18.34"
 assertJ= "3.26.0"
 mockito= "4.11.0"
 
