@@ -84,7 +84,7 @@ spotless {
         formatAnnotations()
         trimTrailingWhitespace()
     }
-    lineEndings = LineEnding.GIT_ATTRIBUTES
+    lineEndings = LineEnding.GIT_ATTRIBUTES_FAST_ALLSAME
 }
 
 tasks.jacocoTestReport {
