@@ -5,7 +5,7 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     jacoco
-    id("com.gradle.plugin-publish") version "1.3.1"
+    id("com.gradle.plugin-publish") version "2.0.0"
     id("com.diffplug.spotless") version "7.2.1"
     id("io.github.paul-manjarres.test-time-reporter") version "0.13"
 }
