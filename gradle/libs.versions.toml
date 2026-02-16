@@ -1,5 +1,5 @@
 [versions]
-junit-jupiter = "6.0.2"
+junit-jupiter = "6.0.3"
 lombok = "1.18.42"
 assertJ= "3.27.7"
 mockito= "4.11.0"
