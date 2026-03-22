@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
@@ -18,6 +19,7 @@ import org.paulmanjarres.gradle.timereporter.model.views.SlowestTestsView;
 import org.paulmanjarres.gradle.timereporter.model.views.TestResultsView;
 import org.paulmanjarres.gradle.timereporter.utils.ConsoleUtils;
 
+@CacheableTask
 public abstract class PrintTestTimeStatsTask extends DefaultTask {
 
     @Input
