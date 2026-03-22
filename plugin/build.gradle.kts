@@ -5,8 +5,9 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     jacoco
-    id("com.gradle.plugin-publish") version "1.3.1"
-    id("com.diffplug.spotless") version "8.2.1"
+    id("com.gradle.plugin-publish") version "2.1.0"
+    id("com.diffplug.spotless") version "8.3.0"
+    id("com.github.ben-manes.versions") version "0.53.0"
     id("io.github.paul-manjarres.test-time-reporter") version "0.13"
 }
 
@@ -99,13 +100,6 @@ tasks.jacocoTestReport {
 afterEvaluate {
     tasks.spotlessCheck {
         dependsOn(tasks.spotlessApply)
-    }
-}
-
-idea {
-    module {
-        testSourceDirs.addAll(functionalTestSourceSet.java.srcDirs)
-        testResourceDirs.addAll(functionalTestSourceSet.resources.srcDirs)
     }
 }
 
